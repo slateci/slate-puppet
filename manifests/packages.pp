@@ -24,8 +24,8 @@ class slate::packages {
     [ $((`date +%s` - `stat ${slate_cli_pkg} --format='%Y'`)) -lt 432000 ]",
   }
   ~> exec { 'untar SLATE CLI':
-    path    => ['/usr/sbin/', '/usr/bin', '/bin', '/sbin'],
-    command => "tar -xf ${slate_cli_pkg} -C /usr/local/bin",
+    path        => ['/usr/sbin/', '/usr/bin', '/bin', '/sbin'],
+    command     => "tar -xf ${slate_cli_pkg} -C /usr/local/bin",
+    refreshonly => true,
   }
 }
-

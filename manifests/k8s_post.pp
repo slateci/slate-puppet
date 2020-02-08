@@ -26,9 +26,8 @@ class slate::k8s_post () {
     onlyif  => "kubectl describe nodes ${node_name} | tr -s ' ' | grep 'Taints: node-role.kubernetes.io/master:NoSchedule'",
   }
 
-  $shellsafe_provider = shell_escape($slate::cni_network_provider)
   exec { 'Install cni network provider':
-    command     => "kubectl apply -f ${shellsafe_provider}",
+    command     => "kubectl apply -f ${shell_escape($slate::cni_network_provider)}",
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     onlyif      => 'kubectl get nodes',
     unless      => "kubectl -n kube-system get daemonset | egrep '(flannel|weave|calico-node|cilium)'",
@@ -36,12 +35,11 @@ class slate::k8s_post () {
   }
 
   if $slate::metallb_start_ip_range != undef and $slate::metallb_end_ip_range != undef and $slate::metallb_url != undef{
-    $shellsafe_provider = shell_escape($slate::metallb_url)
     exec { 'apply metallb':
-      command     => "kubectl apply -f ${shellsafe_provider}",
+      command     => "kubectl apply -f ${shell_escape($slate::metallb_url)}",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
       onlyif      => 'kubectl get nodes',
-      unless      => "kubectl -n kube-system get daemonset | egrep 'metallb'",
+      unless      => "kubectl -n kube-system get namespaces | egrep 'metallb'",
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
     }
     -> file { 'metallb-config.yaml':
@@ -54,6 +52,7 @@ class slate::k8s_post () {
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
       onlyif      => 'kubectl get nodes',
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+      refreshonly => true,
     }
   }
 }
