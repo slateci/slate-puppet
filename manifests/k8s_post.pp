@@ -47,7 +47,7 @@ class slate::k8s_post () {
     -> file { 'metallb-config.yaml':
       path    => "${slate::slate_tmp_dir}/metallb-config.yaml",
       require => File[$slate::slate_tmp_dir],
-      content => template('slate/metallb-config.yaml'),
+      content => epp('slate/metallb-config.yaml.epp'),
     }
     ~> exec { 'apply metallb config':
       command     => "kubectl apply -f ${slate::slate_tmp_dir}/metallb-config.yaml",
