@@ -102,7 +102,7 @@ class slate::k8s_pre () {
   if $slate::disable_root_ssh {
     exec { 'disable root ssh login':
       path    => ['/usr/sbin', '/usr/bin', '/bin', '/sbin'],
-      command => "sed -i --follow-symlinks 's/#PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config",
+      command => "sed -i --follow-symlinks 's/#?PermitRootLogin yes/PermitRootLogin no/g' /etc/ssh/sshd_config",
       unless  => 'grep "PermitRootLogin no" /etc/ssh/sshd_config'
     }
   }
