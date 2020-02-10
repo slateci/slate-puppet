@@ -14,4 +14,10 @@ class slate::accounts () {
       user_list     => $slate::user_accounts,
     }
   }
+
+  include 'sudo'
+  sudo::conf { 'wheel':
+    priority => 10,
+    content  => '%wheel ALL=(ALL) NOPASSWD: ALL',
+  }
 }
