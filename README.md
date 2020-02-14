@@ -8,7 +8,6 @@ A Puppet module that auto configures a single-node SLATE cluster.
 2. [Setup - The basics of getting started with slate-puppet](#setup)
     * [What slate-puppet affects](#what-slate-puppet-affects)
     * [Setup requirements](#setup-requirements)
-    * [Beginning with slate-puppet](#beginning-with-slate-puppet)
 3. [Usage - Configuration options and additional functionality](#usage)
 
 ## Description
