@@ -3,7 +3,7 @@ slate::k8s_version: '1.15.5'
 slate::docker_version: '19.03.3'
 slate::cni_network_provider: 'https://docs.projectcalico.org/v3.8/manifests/calico.yaml'
 slate::disable_root_ssh: true
-slate::metallb_url:
+slate::metallb_url: 'https://raw.githubusercontent.com/google/metallb/v0.8.1/manifests/metallb.yaml'
 slate::metallb_start_ip_range:
 slate::metallb_end_ip_range:
 slate::slate_client_token:
