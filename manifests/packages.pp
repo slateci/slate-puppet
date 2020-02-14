@@ -4,13 +4,28 @@
 # @api private
 class slate::packages {
   $slate_cli_pkg = "${slate::slate_tmp_dir}/slate-linux.tar.gz"
+  $kube_packages = ['kubelet', 'kubectl', 'kubeadm']
 
   package { $slate::package_list:
     ensure => latest,
   }
 
+  yumrepo { 'Kubernetes':
+    ensure        => 'present',
+    baseurl       => 'https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64',
+    enabled       => '1',
+    gpgcheck      => '1',
+    repo_gpgcheck => '1',
+    gpgkey        => 'https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg',
+  }
+
   class { 'docker':
-    version => $slate::docker_version,
+    version          => $slate::docker_version,
+    extra_parameters => ['--exec-opt native.cgroupdriver=systemd'],
+  }
+  -> package { $kube_packages:
+    ensure  => $slate::k8s_version,
+    require => Yumrepo['Kubernetes'],
   }
 
   file { $slate::slate_tmp_dir:
