@@ -8,7 +8,7 @@ class slate::k8s_pre () {
   }
 
   exec { 'disable swap':
-    path    => ['/usr/sbin/', '/usr/bin', '/bin', '/sbin'],
+    path    => ['/usr/sbin', '/usr/bin', '/bin', '/sbin'],
     command => 'swapoff -a',
     unless  => "awk '{ if (NR > 1) exit 1}' /proc/swaps",
   }
