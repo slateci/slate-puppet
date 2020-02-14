@@ -6,8 +6,9 @@ class slate::k8s_post () {
   $node_name = fact('networking.fqdn')
 
   service { 'kubelet':
-    ensure => running,
-    enable => true,
+    ensure  => running,
+    enable  => true,
+    require => Service['docker'],
   }
 
   exec { 'kubeadm init':
