@@ -20,7 +20,7 @@ class slate (
   Optional[String] $slate_loc_long,
   Optional[Accounts::User::Hash] $user_accounts,
   Optional[Accounts::User::Resource] $user_defaults,
-  Optional[Array] $package_list = ['htop', 'strace', 'tmux', 'iftop', 'screen', 'sysstat'],
+  Optional[Array] $package_list = ['htop', 'strace', 'tmux', 'iftop', 'screen', 'sysstat', 'jq', 'curl'],
 ) {
   contain slate::packages
   contain slate::k8s_pre
