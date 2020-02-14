@@ -34,9 +34,8 @@ class slate::packages {
   -> exec { 'download SLATE CLI':
     path    => ['/usr/sbin/', '/usr/bin', '/bin', '/sbin'],
     command => "curl -L https://jenkins.slateci.io/artifacts/client/slate-linux.tar.gz -o ${slate_cli_pkg}",
-    # If the SLATE CLI package is more than 5 days old, pull and update.
-    unless  => "stat ${slate_cli_pkg} --format='%Y' 1> /dev/null 2> /dev/null && \
-    [ $((`date +%s` - `stat ${slate_cli_pkg} --format='%Y'`)) -lt 432000 ]",
+    onlyif  => "[ `slate version 2>/dev/null | egrep '[0-9]+'`
+    -le `curl -L https://jenkins.slateci.io/artifacts/client/latest.json | jq -r '.[0].version'` ]",
   }
   ~> exec { 'untar SLATE CLI':
     path        => ['/usr/sbin/', '/usr/bin', '/bin', '/sbin'],
