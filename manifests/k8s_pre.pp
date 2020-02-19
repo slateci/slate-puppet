@@ -88,8 +88,8 @@ class slate::k8s_pre () {
       path => '/etc/ssh/sshd_config',
     }
     file_line { 'PermitRootLogin yes':
-      line   => 'PermitRootLogin yes',
       ensure => absent,
+      line   => 'PermitRootLogin yes',
       path   => '/etc/ssh/sshd_config',
     }
   }
