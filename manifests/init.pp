@@ -9,6 +9,8 @@ class slate (
   String $slate_tmp_dir = '/tmp/slate',
   String $slate_endpoint_url = 'https://api.slateci.io:18080',
   Boolean $disable_root_ssh = true,
+  Boolean $kube_schedule_on_controller = true,
+  Boolean $create_slate_admin_accounts = true,
   Optional[String] $metallb_url,
   Optional[String] $metallb_start_ip_range,
   Optional[String] $metallb_end_ip_range,
@@ -26,7 +28,10 @@ class slate (
   contain slate::k8s_pre
   contain slate::k8s_post
   contain slate::api
-  contain slate::accounts
+
+  if $slate::create_slate_admin_accounts {
+    contain slate::accounts
+  }
 
   Class['slate::packages']
   -> Class['slate::k8s_pre']

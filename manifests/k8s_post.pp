@@ -23,18 +23,21 @@ class slate::k8s_post (
     unless      => "kubectl get nodes | grep ${node_name}",
   }
 
-  -> exec { 'schedule on controller':
-    command => "kubectl taint nodes ${node_name} node-role.kubernetes.io/master-",
-    path    => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-    onlyif  => "kubectl describe nodes ${node_name} | tr -s ' ' | grep 'Taints: node-role.kubernetes.io/master:NoSchedule'",
-  }
-
   -> exec { 'Install cni network provider':
     command     => "kubectl apply -f ${shell_escape($slate::cni_network_provider)}",
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     onlyif      => 'kubectl get nodes',
     unless      => "kubectl -n kube-system get daemonset | egrep '(flannel|weave|calico-node|cilium)'",
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+  }
+
+  if $slate::kube_schedule_on_controller {
+    exec { 'schedule on controller':
+      command => "kubectl taint nodes ${node_name} node-role.kubernetes.io/master-",
+      path    => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
+      onlyif  => "kubectl describe nodes ${node_name} | tr -s ' ' | grep 'Taints: node-role.kubernetes.io/master:NoSchedule'",
+      require => Exec['kubeadm init'],
+    }
   }
 
   if $metallb_enabled {
