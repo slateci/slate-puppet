@@ -13,23 +13,23 @@ class slate::k8s_post (
     require => Service['docker'],
   }
 
-  exec { 'kubeadm init':
+  # Add some flags for kubeadm init
+  -> exec { 'kubeadm init':
     command     => 'kubeadm init --pod-network-cidr=192.168.0.0/16',
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     logoutput   => true,
     timeout     => 0,
     unless      => "kubectl get nodes | grep ${node_name}",
-    require     => Service['kubelet'],
   }
 
-  exec { 'schedule on controller':
+  -> exec { 'schedule on controller':
     command => "kubectl taint nodes ${node_name} node-role.kubernetes.io/master-",
     path    => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     onlyif  => "kubectl describe nodes ${node_name} | tr -s ' ' | grep 'Taints: node-role.kubernetes.io/master:NoSchedule'",
   }
 
-  exec { 'Install cni network provider':
+  -> exec { 'Install cni network provider':
     command     => "kubectl apply -f ${shell_escape($slate::cni_network_provider)}",
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     onlyif      => 'kubectl get nodes',
@@ -44,6 +44,7 @@ class slate::k8s_post (
       onlyif      => 'kubectl get nodes',
       unless      => "kubectl -n kube-system get namespaces | egrep 'metallb'",
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+      require     => Exec['Install cni network provider'],
     }
     -> file { 'metallb-config.yaml':
       path    => "${slate::slate_tmp_dir}/metallb-config.yaml",
