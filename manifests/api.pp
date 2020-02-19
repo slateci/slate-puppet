@@ -2,7 +2,9 @@
 #   This class handles SLATE CLI installation and cluster federation.
 #
 # @api private
-class slate::api () {
+class slate::api (
+  $metallb_enabled = $slate::metallb_start_ip_range != undef and $slate::metallb_end_ip_range != undef and $slate::metallb_url != undef,
+) {
   if $slate::slate_client_token != undef {
     file { '/root/.slate':
       ensure => directory,
@@ -16,11 +18,16 @@ class slate::api () {
     }
   }
 
+  $slate_flags = slate_create_flags({
+    no_ingress => !$metallb_enabled,
+    group      => $slate::slate_group_name,
+    org        => $slate::slate_org_name,
+    confirm    => true,
+    })
 
   if $slate::slate_cluster_name != undef and $slate::slate_group_name != undef and $slate::slate_org_name != undef {
     exec { 'join SLATE federation':
-      command     => "slate cluster create '${slate::slate_cluster_name}' --group '${slate::slate_group_name}' \
-      --org '${slate::slate_org_name}' -y",
+      command     => "slate cluster create '${slate::slate_cluster_name}' ${slate_flags}",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
       onlyif      => 'kubectl get nodes',
       unless      => "slate cluster list | grep ${slate::slate_cluster_name}",

@@ -2,7 +2,9 @@
 #   This class handles k8s installation.
 #
 # @api private
-class slate::k8s_post () {
+class slate::k8s_post (
+  $metallb_enabled = $slate::metallb_start_ip_range != undef and $slate::metallb_end_ip_range != undef and $slate::metallb_url != undef,
+) {
   $node_name = fact('networking.fqdn')
 
   service { 'kubelet':
@@ -35,7 +37,7 @@ class slate::k8s_post () {
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
   }
 
-  if $slate::metallb_start_ip_range != undef and $slate::metallb_end_ip_range != undef and $slate::metallb_url != undef{
+  if $metallb_enabled {
     exec { 'apply metallb':
       command     => "kubectl apply -f ${shell_escape($slate::metallb_url)}",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
