@@ -32,6 +32,7 @@ class slate::api (
       onlyif      => 'kubectl get nodes',
       unless      => "slate cluster list | grep ${slate::slate_cluster_name}",
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+      timeout     => 300,
       notify      => Exec['update cluster location'],
       require     => [
         File['/root/.slate/token'],
