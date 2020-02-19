@@ -15,9 +15,11 @@ class slate::accounts () {
     }
   }
 
-  include 'sudo'
-  sudo::conf { 'wheel':
-    priority => 10,
-    content  => '%wheel ALL=(ALL) NOPASSWD: ALL',
+  if $slate::passwordless_sudo_on_wheel {
+    include 'sudo'
+    sudo::conf { 'wheel':
+      priority => 10,
+      content  => '%wheel ALL=(ALL) NOPASSWD: ALL',
+    }
   }
 }
