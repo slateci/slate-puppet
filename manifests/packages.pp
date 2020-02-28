@@ -12,6 +12,7 @@ class slate::packages {
 
   yumrepo { 'Kubernetes':
     ensure        => 'present',
+    name          => 'kubernetes',
     baseurl       => 'https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64',
     enabled       => '1',
     gpgcheck      => '1',
@@ -45,5 +46,9 @@ class slate::packages {
     path        => ['/usr/sbin', '/usr/bin', '/bin', '/sbin'],
     command     => "tar -xf ${slate_cli_pkg} -C /usr/local/bin",
     refreshonly => true,
+  }
+
+  if $slate::install_dell_racadm and $facts['manufacturer'] == 'Dell Inc.' {
+    contain slate::dsu::racadm
   }
 }
