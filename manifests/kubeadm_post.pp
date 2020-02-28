@@ -17,10 +17,11 @@ class slate::kubeadm_post (
 
   if $slate::kube_schedule_on_controller {
     exec { 'schedule on controller':
-      command => "kubectl taint nodes ${node_name} node-role.kubernetes.io/master-",
-      path    => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-      onlyif  => "kubectl describe nodes ${node_name} | tr -s ' ' | grep 'Taints: node-role.kubernetes.io/master:NoSchedule'",
-      require => Exec['kubeadm init'],
+      command     => "kubectl taint nodes ${node_name} node-role.kubernetes.io/master-",
+      path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
+      onlyif      => "kubectl describe nodes ${node_name} | tr -s ' ' | grep 'Taints: node-role.kubernetes.io/master:NoSchedule'",
+      require     => Exec['kubeadm init'],
+      environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
     }
   }
 
