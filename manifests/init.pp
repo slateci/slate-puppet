@@ -11,6 +11,7 @@ class slate (
   Boolean $disable_root_ssh = true,
   Boolean $kube_schedule_on_controller = true,
   Boolean $create_slate_admin_accounts = true,
+  Boolean $install_dell_tools = true,
   Optional[String] $metallb_url,
   Optional[String] $metallb_start_ip_range,
   Optional[String] $metallb_end_ip_range,
@@ -20,9 +21,6 @@ class slate (
   Optional[String] $slate_org_name,
   Optional[String] $slate_loc_lat,
   Optional[String] $slate_loc_long,
-  Optional[Accounts::User::Hash] $user_accounts,
-  Optional[Accounts::User::Resource] $user_defaults,
-  Boolean $passwordless_sudo_on_wheel = true,
   Array $package_list = ['htop', 'strace', 'tmux', 'iftop', 'screen', 'sysstat', 'jq', 'curl'],
 ) {
   contain slate::packages

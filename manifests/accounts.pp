@@ -3,9 +3,9 @@
 #
 # @api private
 class slate::accounts (
-  Accounts::User::Hash $user_accounts = $slate::user_accounts,
-  Accounts::User::Resource $user_defaults = $slate::user_defaults,
-  Boolean $passwordless_sudo_on_wheel = $slate::passwordless_sudo_on_wheel,
+  Accounts::User::Hash $user_accounts,
+  Accounts::User::Resource $user_defaults,
+  Boolean $passwordless_sudo_on_wheel,
 ) {
   include accounts
   $user_accounts.each |Accounts::User::Name $username, Accounts::User::Resource $resource| {
