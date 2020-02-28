@@ -3,13 +3,15 @@
 #
 # @api private
 class slate::accounts (
-  $user_accounts = $slate::user_accounts,
-  $user_defaults = $slate::user_defaults,
-  $passwordless_sudo_on_wheel = $slate::passwordless_sudo_on_wheel,
+  Accounts::User::Hash $user_accounts = $slate::user_accounts,
+  Accounts::User::Resource $user_defaults = $slate::user_defaults,
+  Boolean $passwordless_sudo_on_wheel = $slate::passwordless_sudo_on_wheel,
 ) {
-  class { 'accounts':
-    user_list     => $slate::user_accounts,
-    user_defaults => $slate::user_defaults,
+  include accounts
+  $user_accounts.each |Accounts::User::Name $username, Accounts::User::Resource $resource| {
+    accounts::user { $username:
+      * => $user_defaults + $resource,
+    }
   }
 
   if $passwordless_sudo_on_wheel {
