@@ -2,20 +2,17 @@
 #   This class handles creation of SLATE administrator accounts.
 #
 # @api private
-class slate::accounts () {
-  if $slate::user_accounts != undef and $slate::user_defaults != undef {
-    class { 'accounts':
-      user_list     => $slate::user_accounts,
-      user_defaults => $slate::user_defaults,
-    }
-  }
-  elsif $slate::user_accounts != undef {
-    class { 'accounts':
-      user_list     => $slate::user_accounts,
-    }
+class slate::accounts (
+  $user_accounts = $slate::user_accounts,
+  $user_defaults = $slate::user_defaults,
+  $passwordless_sudo_on_wheel = $slate::passwordless_sudo_on_wheel,
+) {
+  class { 'accounts':
+    user_list     => $slate::user_accounts,
+    user_defaults => $slate::user_defaults,
   }
 
-  if $slate::passwordless_sudo_on_wheel {
+  if $passwordless_sudo_on_wheel {
     include 'sudo'
     sudo::conf { 'wheel':
       priority => 10,
