@@ -26,8 +26,9 @@ class slate (
   Array $package_list = ['htop', 'strace', 'tmux', 'iftop', 'screen', 'sysstat', 'jq', 'curl'],
 ) {
   contain slate::packages
-  contain slate::k8s_pre
-  contain slate::k8s_post
+  contain slate::kubeadm_pre
+  contain slate::kubeadm_init
+  contain slate::kubeadm_post
   contain slate::api
 
   if $slate::create_slate_admin_accounts {
@@ -35,7 +36,8 @@ class slate (
   }
 
   Class['slate::packages']
-  -> Class['slate::k8s_pre']
-  -> Class['slate::k8s_post']
+  -> Class['slate::kubeadm_pre']
+  -> Class['slate::kubeadm_init']
+  -> Class['slate::kubeadm_post']
   -> Class['slate::api']
 }

@@ -2,7 +2,7 @@
 #   This class handles k8s installation.
 #
 # @api private
-class slate::k8s_pre () {
+class slate::kubeadm_pre () {
   class { 'selinux':
     mode => 'permissive',
   }
