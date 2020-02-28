@@ -48,7 +48,8 @@ class slate::packages {
     refreshonly => true,
   }
 
-  if $slate::install_dell_racadm and $facts['manufacturer'] == 'Dell Inc.' {
+  if $slate::install_dell_tools and $facts['manufacturer'] == 'Dell Inc.' {
     contain slate::dsu::racadm
+    contain slate::dsu::dsu
   }
 }

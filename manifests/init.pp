@@ -11,7 +11,7 @@ class slate (
   Boolean $disable_root_ssh = true,
   Boolean $kube_schedule_on_controller = true,
   Boolean $create_slate_admin_accounts = true,
-  Boolean $install_dell_racadm = true,
+  Boolean $install_dell_tools = true,
   Optional[String] $metallb_url,
   Optional[String] $metallb_start_ip_range,
   Optional[String] $metallb_end_ip_range,
