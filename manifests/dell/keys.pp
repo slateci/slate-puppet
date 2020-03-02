@@ -2,7 +2,7 @@
 #   This class handles installation of Dell's public keys.
 #
 # @api private
-class slate::dsu::keys (
+class slate::dell::keys (
   $key_names = ['0x756ba70b1019ced6', '0x1285491434D8786F', '0xca77951d23b66a9d']
 ) {
   file { '/usr/libexec/dell_dup':

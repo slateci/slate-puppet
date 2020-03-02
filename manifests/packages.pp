@@ -49,7 +49,7 @@ class slate::packages {
   }
 
   if $slate::install_dell_tools and $facts['manufacturer'] == 'Dell Inc.' {
-    contain slate::dsu::racadm
-    contain slate::dsu::dsu
+    contain slate::dell::racadm
+    contain slate::dell::dsu
   }
 }

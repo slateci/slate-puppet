@@ -2,9 +2,9 @@
 #   This class handles installation of Dell's DSU repository.
 #
 # @api private
-class slate::dsu::repo {
-  require slate::dsu::keys
-  $key_names = $slate::dsu::keys::key_names
+class slate::dell::repo {
+  require slate::dell::keys
+  $key_names = $slate::dell::keys::key_names
 
   yumrepo { 'dell-system-update_independent':
     name     => 'dell-system-update_independent',
