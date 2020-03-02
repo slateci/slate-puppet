@@ -13,6 +13,14 @@ class slate::kubeadm_pre () {
     unless  => "awk '{ if (NR > 1) exit 1}' /proc/swaps",
   }
 
+  file_line { 'disable swap in /etc/fstab':
+    ensure            => absent,
+    path              => '/etc/fstab',
+    match             => '.+\sswap\s.+',
+    match_for_absence => true,
+    multiple          => true,
+  }
+
   # Tuning of sysctl
   kmod::load { 'br_netfilter':
     before => Sysctl['net.bridge.bridge-nf-call-iptables'],
