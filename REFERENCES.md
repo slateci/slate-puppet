@@ -9,8 +9,6 @@ _Public Classes_
 
 * [`slate`](#slate): slate  Main class, includes all other classes.
 * [`slate::accounts`](#slateaccounts): This class creates SLATE administrator accounts.
-* [`slate::kubeadm::packages`](#slatekubeadmpackages): This class handles installation of Docker and Kubernetes as a single-node cluster.
-* [`slate::kubeadm::run_init`](#slatekubeadmrun_init): This class handles kubeadm init.
 * [`slate::packages`](#slatepackages): This class handles installation of SLATE required packages.
 * [`slate::registration`](#slateregistration): This class handles SLATE cluster federation registration.
 * [`slate::security`](#slatesecurity): This class handles setting (and disabling) security settings for SLATE, such as
@@ -23,10 +21,12 @@ _Private Classes_
 * `slate::dell::keys`: This class handles installation of Dell's public keys.
 * `slate::dell::racadm`: This class handles installation of RACADM.
 * `slate::dell::repo`: This class handles installation of Dell's DSU repository.
+* `slate::kubeadm::packages`: This class handles installation of Docker and Kubernetes as a single-node cluster.
 * `slate::kubeadm::post`: This class handles kubeadm commands post Kubernetes installation, such as
 cni network provider, scheduling on controller, etc.
 * `slate::kubeadm::pre`: This class handles pre-Kubernetes installation steps such as disabling swap,
 setting up kernel modules, etc.
+* `slate::kubeadm::run_init`: This class handles kubeadm init.
 
 **Functions**
 
@@ -98,37 +98,6 @@ to apply to created accounts.
 Data type: `Boolean`
 
 If true, users in group 'wheel' will have NOPASSWD sudo access.
-
-### slate::kubeadm::packages
-
-This class handles installation of Docker and Kubernetes as a single-node cluster.
-
-* **Note** This class assumes installation on a CentOS 7 machine.
-Docker is installed using systemd as the cgroupdriver.
-
-#### Parameters
-
-The following parameters are available in the `slate::kubeadm::packages` class.
-
-##### `k8s_version`
-
-Data type: `String`
-
-The version of Kubernetes to install.
-
-Default value: '1.15.5'
-
-##### `docker_version`
-
-Data type: `String`
-
-The version of Docker to install.
-
-Default value: '19.03.3'
-
-### slate::kubeadm::run_init
-
-This class handles kubeadm init.
 
 ### slate::packages
 
