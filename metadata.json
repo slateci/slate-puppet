@@ -4,9 +4,9 @@
   "author": "Emerson Ford",
   "summary": "Install, configures, and manages the SLATE stack",
   "license": "MIT",
-  "source": "https://github.com/slateci/slate-puppet-infra",
-  "project_page": "https://github.com/slateci/slate-puppet-infra/blob/master/README.md",
-  "issues_url": "https://github.com/slateci/slate-puppet-infra/issues",
+  "source": "https://github.com/slateci/slate-puppet",
+  "project_page": "https://github.com/slateci/slate-puppet/blob/master/README.md",
+  "issues_url": "https://github.com/slateci/slate-puppet/issues",
   "dependencies": [
     {
       "name": "puppetlabs-stdlib",
