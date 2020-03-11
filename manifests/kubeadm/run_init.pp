@@ -1,6 +1,8 @@
 # @summary
 #   This class handles kubeadm init.
 #
+# @api private
+#
 class slate::kubeadm::run_init {
   $node_name = fact('networking.fqdn')
 

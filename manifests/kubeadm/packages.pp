@@ -4,6 +4,8 @@
 # @note This class assumes installation on a CentOS 7 machine.
 #   Docker is installed using systemd as the cgroupdriver.
 #
+# @api private
+#
 # @param k8s_version
 #   The version of Kubernetes to install.
 # @param docker_version
