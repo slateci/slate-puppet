@@ -1,6 +1,6 @@
 # slate-puppet
 
-A Puppet module that auto configures a single-node SLATE cluster.
+A Puppet module that configures a Kubernetes cluster to be SLATE-ready.
 
 #### Table of Contents
 
@@ -12,30 +12,42 @@ A Puppet module that auto configures a single-node SLATE cluster.
 
 ## Description
 
-This Puppet module will install and setup SLATE packages, Kubernetes, accounts, and more automatically.
+This Puppet module, by default, will install a single-node Kubernetes cluster and register it with SLATE.
 
-If certain Hiera parameters such as the SLATE CLI token are present, this module will auto register your cluster with the SLATE API server.
+It is designed to be highly modular, thus you can choose not to have this module configure a single-node
+Kubernetes cluster and instead use something like puppetlabs-kubernetes to bring up your Kubernetes cluster.
+The rest of the module can then be used to register that cluster with SLATE.
 
 ## Setup
 
 ### What slate-puppet affects
 
-This module will do the following:
- * Setup new user accounts
- * Install and configure Kubernetes (including CNI and MetalLB)
- * Disable firewalld for Kubernetes
- * Perform sysctl tuning for Kubernetes
+* `accounts` will create and manage SLATE administrator accounts.
+* `packages` will install and manage SLATE packages, including the SLATE CLI.
+* `registration` will register your Kubernetes cluster with SLATE.
+* `security` will manage firewall rules, SSH rules, and selinux settings.
+* `tuning` will manage sysctl settings.
+* `kubeadm::` will install and configure your box to be a single-node Kubernetes cluster.
+* `dell::` installs Dell utilities.
 
 ### Setup Requirements
 
-For MetalLB configurations, the Hiera parameters for MetalLB must be set.
+If `single_node_cluster` is set to false, then a Kubernetes installation must be present before running
+this module. Please see the documentation of `registration` for more details.
 
 For automatic SLATE cluster registeration, all SLATE API related parameters must be set.
 
 ## Usage
 
-`include slate` for a specific node to register it.
+For a single-node installation, add `include slate` to the node's definition.
+
+For a cluster using some other Kubernetes management, add
+```
+class { 'slate':
+    single_node_cluster => false,
+}
+```
 
 ## Limitations
 
-This module only supports single-node SLATE clusters configurations. Multi-node support is still TBD.
+Several of the modules are still a WIP, such as security.
