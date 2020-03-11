@@ -1,12 +1,10 @@
 # @summary
-#   This class handles k8s installation.
+#   This class handles pre-Kubernetes installation steps such as disabling swap,
+#   setting up kernel modules, etc.
 #
 # @api private
-class slate::kubeadm_pre () {
-  class { 'selinux':
-    mode => 'permissive',
-  }
-
+#
+class slate::kubeadm::pre {
   exec { 'disable swap':
     path    => ['/usr/sbin', '/usr/bin', '/bin', '/sbin'],
     command => 'swapoff -a',
@@ -21,7 +19,7 @@ class slate::kubeadm_pre () {
     multiple          => true,
   }
 
-  # Tuning of sysctl
+  # Set up the required sysctl configs and kernel modules.
   kmod::load { 'br_netfilter':
     before => Sysctl['net.bridge.bridge-nf-call-iptables'],
   }
@@ -46,60 +44,6 @@ class slate::kubeadm_pre () {
   sysctl { 'net.ipv6.conf.all.forwarding':
     ensure => present,
     value  => '1',
-  }
-
-  sysctl { 'net.core.rmem_max':
-    ensure => present,
-    value  => '67108864',
-  }
-
-  sysctl { 'net.core.wmem_max':
-    ensure => present,
-    value  => '67108864',
-  }
-
-  sysctl { 'net.ipv4.tcp_rmem':
-    ensure => present,
-    value  => '4096 87380 33554432',
-  }
-
-  sysctl { 'net.ipv4.tcp_wmem':
-    ensure => present,
-    value  => '4096 65536 33554432',
-  }
-
-  sysctl { 'net.ipv4.tcp_congestion_control':
-    ensure => present,
-    value  => 'htcp',
-  }
-
-  sysctl { 'net.ipv4.tcp_mtu_probing':
-    ensure => present,
-    value  => '1',
-  }
-
-  sysctl { 'net.core.default_qdisc':
-    ensure => present,
-    value  => 'fq',
-  }
-
-
-  # TODO(emersonf): Change this to a specific port list.
-  class { 'firewalld':
-    service_enable => false,
-    service_ensure => stopped,
-  }
-
-  if $slate::disable_root_ssh {
-    file_line { 'PermitRootLogin no':
-      line => 'PermitRootLogin no',
-      path => '/etc/ssh/sshd_config',
-    }
-    file_line { 'PermitRootLogin yes':
-      ensure => absent,
-      line   => 'PermitRootLogin yes',
-      path   => '/etc/ssh/sshd_config',
-    }
   }
 
   file { '/etc/systemd/system/kubelet.service.d':

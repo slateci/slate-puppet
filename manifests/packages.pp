@@ -1,35 +1,25 @@
 # @summary
-#   This class handles installation of SLATE necessary packages.
+#   This class handles installation of SLATE required packages.
 #
-# @api private
-class slate::packages {
-  $slate_cli_pkg = "${slate::slate_tmp_dir}/slate-linux.tar.gz"
-  $kube_packages = ['kubelet', 'kubectl', 'kubeadm']
+# @param install_dell_tools
+#   Installs RACADM and dsu if the manufacturer is 'Dell Inc.'
+# @param package_list
+#   The list of package names to install.
+# @param slate_tmp_dir
+#   The directory to unpack the SLATE CLI into.
+#
+class slate::packages (
+  Boolean $install_dell_tools = true,
+  Array $package_list = ['htop', 'strace', 'tmux', 'iftop', 'screen', 'sysstat', 'jq', 'curl'],
+  String $slate_tmp_dir = $slate::slate_tmp_dir,
+) {
+  $slate_cli_pkg = "${slate_tmp_dir}/slate-linux.tar.gz"
 
-  package { $slate::package_list:
+  package { $package_list:
     ensure => latest,
   }
 
-  yumrepo { 'Kubernetes':
-    ensure        => 'present',
-    name          => 'kubernetes',
-    baseurl       => 'https://packages.cloud.google.com/yum/repos/kubernetes-el7-x86_64',
-    enabled       => '1',
-    gpgcheck      => '1',
-    repo_gpgcheck => '1',
-    gpgkey        => 'https://packages.cloud.google.com/yum/doc/yum-key.gpg https://packages.cloud.google.com/yum/doc/rpm-package-key.gpg',
-  }
-
-  class { 'docker':
-    version          => $slate::docker_version,
-    extra_parameters => ['--exec-opt native.cgroupdriver=systemd'],
-  }
-  -> package { $kube_packages:
-    ensure  => $slate::k8s_version,
-    require => Yumrepo['Kubernetes'],
-  }
-
-  file { $slate::slate_tmp_dir:
+  file { $slate_tmp_dir:
     ensure => directory,
   }
   -> exec { 'download SLATE CLI':
@@ -48,7 +38,7 @@ class slate::packages {
     refreshonly => true,
   }
 
-  if $slate::install_dell_tools and $facts['manufacturer'] == 'Dell Inc.' {
+  if $install_dell_tools and $facts['manufacturer'] == 'Dell Inc.' {
     contain slate::dell::racadm
     contain slate::dell::dsu
   }

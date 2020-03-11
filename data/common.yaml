@@ -1,16 +1,17 @@
 ---
-slate::k8s_version: '1.15.5'
-slate::docker_version: '19.03.3'
-slate::cni_network_provider: 'https://docs.projectcalico.org/v3.8/manifests/calico.yaml'
-slate::metallb_url: 'https://raw.githubusercontent.com/google/metallb/v0.8.1/manifests/metallb.yaml'
-slate::metallb_start_ip_range:
-slate::metallb_end_ip_range:
-slate::slate_client_token:
-slate::slate_cluster_name:
-slate::slate_group_name:
-slate::slate_org_name:
-slate::slate_loc_lat:
-slate::slate_loc_long:
+slate::kubeadm::packages::k8s_version: '1.15.5'
+slate::kubeadm::packages::docker_version: '19.03.3'
+slate::kubeadm::post::cni_network_provider: 'https://docs.projectcalico.org/v3.8/manifests/calico.yaml'
+slate::kubeadm::post::metallb_url: 'https://raw.githubusercontent.com/google/metallb/v0.8.1/manifests/metallb.yaml'
+slate::kubeadm::post::metallb_start_ip_range:
+slate::kubeadm::post::metallb_end_ip_range:
+slate::registration::slate_client_token:
+slate::registration::slate_cluster_name:
+slate::registration::slate_group_name:
+slate::registration::slate_org_name:
+slate::registration::slate_loc_lat:
+slate::registration::slate_loc_long:
+slate::security::disable_root_ssh: true
 slate::accounts::user_accounts:
   lincolnb:
     sshkeys:

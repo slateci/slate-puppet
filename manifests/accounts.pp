@@ -1,7 +1,16 @@
 # @summary
-#   This class handles creation of SLATE administrator accounts.
+#   This class creates SLATE administrator accounts.
 #
-# @api private
+# @see https://forge.puppet.com/puppetlabs/accounts
+#
+# @param user_accounts
+#   An Accounts::User::Hash of users to create.
+# @param user_defaults
+#   An Accounts::User::Resource containing the default settings
+#   to apply to created accounts.
+# @param passwordless_sudo_on_wheel
+#   If true, users in group 'wheel' will have NOPASSWD sudo access.
+#
 class slate::accounts (
   Accounts::User::Hash $user_accounts,
   Accounts::User::Resource $user_defaults,
@@ -9,6 +18,7 @@ class slate::accounts (
 ) {
   include accounts
   $user_accounts.each |Accounts::User::Name $username, Accounts::User::Resource $resource| {
+    # TODO(emersonford): Use `ensure_resource` here.
     accounts::user { $username:
       * => $user_defaults + $resource,
     }
