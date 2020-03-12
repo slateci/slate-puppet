@@ -55,8 +55,8 @@ class slate::kubeadm::post (
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
       require     => Exec['Install cni network provider'],
     }
-    -> file { 'metallb-config.yaml':
-      path    => "${slate_tmp_dir}/metallb-config.yaml",
+
+    file { "${slate_tmp_dir}/metallb-config.yaml":
       require => File[$slate_tmp_dir],
       content => epp('slate/metallb-config.yaml.epp'),
     }
@@ -66,6 +66,7 @@ class slate::kubeadm::post (
       onlyif      => 'kubectl get nodes',
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
       refreshonly => true,
+      require     => Exec['apply metallb'],
     }
   }
 }
