@@ -13,15 +13,21 @@ class slate::dell::keys (
   }
 
   $key_names.each |String $key_name| {
-    file { "/usr/libexec/dell_dup/${key_name}.asc":
+    exec { "download Dell key ${key_name}":
+      path      => '/bin:/usr/bin:/sbin:/usr/sbin',
+      command   => "curl -sSL https://linux.dell.com/repo/pgp_pubkeys/${key_name}.asc -o /usr/libexec/dell_dup/${key_name}.asc",
+      unless    => "test -f /usr/libexec/dell_dup/${key_name}.asc",
+      logoutput => 'on_failure',
+    }
+    # Using https://linux.dell.com as a file source caused some strange self-signed certificate error
+    # with Puppet agent. The exec above is a workaround for this.
+    -> file { "/usr/libexec/dell_dup/${key_name}.asc":
       ensure  => present,
-      source  => "https://linux.dell.com/repo/pgp_pubkeys/${key_name}.asc",
       owner   => 'root',
       group   => 'root',
       mode    => '0644',
       require => File['/usr/libexec/dell_dup'],
     }
-
     -> exec { "import gpg key ${key_name} into RPM":
       path      => '/bin:/usr/bin:/sbin:/usr/sbin',
       command   => "rpm --import /usr/libexec/dell_dup/${key_name}.asc",
