@@ -50,5 +50,4 @@ class slate (
   if $create_slate_admin_accounts {
     contain slate::accounts
   }
-
 }
