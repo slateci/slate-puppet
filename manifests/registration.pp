@@ -58,7 +58,8 @@ class slate::registration (
     exec { 'join SLATE federation':
       command     => "slate cluster create '${slate_cluster_name}' ${slate_flags}",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-      onlyif      => 'kubectl get nodes',
+      # Ensure only the controller runs this command.
+      onlyif      => 'kubectl get nodes $(hostname) | grep "master"',
       # TODO(emersonford): Use a better check for this unless.
       unless      => "slate cluster list | grep ${slate_cluster_name}",
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
