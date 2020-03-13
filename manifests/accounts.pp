@@ -3,6 +3,9 @@
 #
 # @see https://forge.puppet.com/puppetlabs/accounts
 #
+# @note If the username is already managed by some other Puppet module,
+#   this module will not manage the user.
+#
 # @param user_accounts
 #   An Accounts::User::Hash of users to create.
 # @param user_defaults
@@ -18,10 +21,7 @@ class slate::accounts (
 ) {
   include accounts
   $user_accounts.each |Accounts::User::Name $username, Accounts::User::Resource $resource| {
-    # TODO(emersonford): Use `ensure_resource` here.
-    accounts::user { $username:
-      * => $user_defaults + $resource,
-    }
+    ensure_resource('accounts::user', $username, $user_defaults + $resource)
   }
 
   if $passwordless_sudo_on_wheel {
