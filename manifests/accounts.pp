@@ -25,7 +25,8 @@ class slate::accounts (
   }
 
   if $passwordless_sudo_on_wheel {
-    include 'sudo'
+    ensure_resource('sudo', { config_file_replace => false, purge => false })
+
     sudo::conf { 'wheel':
       priority => 10,
       content  => '%wheel ALL=(ALL) NOPASSWD: ALL',
