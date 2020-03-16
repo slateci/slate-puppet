@@ -53,4 +53,4 @@ slate::accounts::user_defaults:
   shell: '/bin/bash'
   password: '!!'
   locked: false
-slate::accounts::passwordless_sudo_on_wheel: true
+slate::accounts::passwordless_sudo: true

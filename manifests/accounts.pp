@@ -11,25 +11,34 @@
 # @param user_defaults
 #   An Accounts::User::Resource containing the default settings
 #   to apply to created accounts.
-# @param passwordless_sudo_on_wheel
-#   If true, users in group 'wheel' will have NOPASSWD sudo access.
+# @param passwordless_sudo
+#   If true, users in the 'wheel' group will have 'NOPASSWD: ALL' sudo privileges.
 #
 class slate::accounts (
   Accounts::User::Hash $user_accounts,
   Accounts::User::Resource $user_defaults,
-  Boolean $passwordless_sudo_on_wheel,
+  Boolean $passwordless_sudo,
 ) {
   include accounts
   $user_accounts.each |Accounts::User::Name $username, Accounts::User::Resource $resource| {
     ensure_resource('accounts::user', $username, $user_defaults + $resource)
   }
 
-  if $passwordless_sudo_on_wheel {
-    ensure_resource('sudo', { config_file_replace => false, purge => false })
+  if $passwordless_sudo {
+    file_line { 'includedir /etc/sudoers.d':
+      ensure => present,
+      path   => '/etc/sudoers',
+      line   => '#includedir /etc/sudoers.d',
+    }
 
-    sudo::conf { 'wheel':
-      priority => 10,
-      content  => '%wheel ALL=(ALL) NOPASSWD: ALL',
+    -> file { '/etc/sudoers.d/10_wheel':
+      ensure  => present,
+      mode    => '0440',
+      content => @(EOT)
+        # Allow passwordless sudo for users in 'wheel'
+        # Managed by Puppet
+        %wheel ALL=(ALL) NOPASSWD: ALL
+        | EOT
     }
   }
 }
