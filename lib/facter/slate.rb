@@ -8,7 +8,7 @@ Facter.add(:slate) do
   kubectl = 'kubectl --kubeconfig="#{kubectl_config}"'
   kubeadm = 'kubeadm'
 
-  kubelet_ver = Facter::Core::Execution.execute("kubelet version")
+  kubelet_ver = Facter::Core::Execution.execute("kubelet --version")
   if $?.exitstatus != 0
     return
   else
