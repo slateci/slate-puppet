@@ -4,22 +4,24 @@ require 'yaml'
 # NOTE: This fact has side-effects on the Kubernetes system.
 # It will generate discovery tokens and certificate keys.
 Facter.add(:slate) do
-  kubectl_config = "/etc/kubernetes/admin.conf"
-  kubectl = 'kubectl --kubeconfig="#{kubectl_config}"'
+  kubectl_config = '/etc/kubernetes/admin.conf'
+  kubectl = "kubectl --kubeconfig='#{kubectl_config}'"
   kubeadm = 'kubeadm'
+  res = {}
 
-  kubelet_ver = Facter::Core::Execution.execute("kubelet --version")
+  kubelet_ver = Facter::Core::Execution.execute('kubelet --version')
   if $?.exitstatus != 0
     return
   else
     kubeadm_ver = Facter::Core::Execution.execute("kubeadm version -o short")
     res["kubernetes"] = {
       "kubelet_version" => (kubelet_ver.match(/Kubernetes v([0-9.]+)/))[1],
-      "kubeadm_version" => (kubeadm_ver.metch(/v([0-9.]+)/))[1]
+      "kubeadm_version" => (kubeadm_ver.match(/v([0-9.]+)/))[1]
     }
   end
 
-  if !(File.exists?(kubectl_config) and Facter::Core::Execution.execute("#{kubectl} get nodes") and $?.exitstatus == 0)
+  Facter::Core::Execution.execute("#{kubectl} get nodes")
+  if $?.exitstatus != 0
     setcode do
       res
     end
@@ -73,13 +75,12 @@ Facter.add(:slate) do
   if discovery_token == ""
     discovery_token = Facter::Core::Execution.execute("#{kubeadm} token create")
   end
-
-  res["kubernetes"] = {
+  res["kubernetes"] = res["kubernetes"].merge({
     "certificate_key" => certificate_key,
     "discovery_ca_cert_hash" => discovery_ca_cert_hash,
     "discovery_token" => discovery_token,
     "leader_acquire_time" => leader_info["acquireTime"],
-  }
+  })
 
   # Publish our control_plane_endpoint or apiserver_advertise_address.
   kubeadm_config_json = Facter::Core::Execution.execute("#{kubectl} get configmap/kubeadm-config -n kube-system -o json")
@@ -91,14 +92,14 @@ Facter.add(:slate) do
   # Only present on a cluster set up as a high-availability cluster.
   if cluster_config.key?("controlPlaneEndpoint")
     cpe = cluster_config["controlPlaneEndpoint"].split(":")
-    res["kubernetes"].merge({
+    res["kubernetes"] = res["kubernetes"].merge({
       "control_plane_endpoint_hostname" => cpe[0],
       "control_plane_endpoint_port" => cpe[1],
     })
-  # The cluster is a single availability cluster.
+    # The cluster is a single availability cluster.
   else
     cluster_status["apiEndpoints"].each_pair do |api_hostname, value|
-      res["kubernetes"].merge({
+      res["kubernetes"] = res["kubernetes"].merge({
         "apiserver_advertise_hostname" => api_hostname,
         "apiserver_advertise_address" => value["advertiseAddress"],
         "apiserver_advertise_port" => value["bindPort"],
