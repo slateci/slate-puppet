@@ -9,10 +9,7 @@ Facter.add(:slate) do
 
   Facter::Core::Execution.execute("#{kubectl} get nodes")
 
-  if $?.exitstatus != 0
-    setcode do
-      {"kubernetes_installed" => false}
-    end
+  if !File.exists?('/etc/kubernetes/admin.conf') or $?.exitstatus != 0
     return
   else
     res = {}
@@ -26,6 +23,7 @@ Facter.add(:slate) do
   # race conditions when bringing up new control nodes. This ensures only the current
   # kube-scheduler leader creates certificate keys. It's not fool-proof in avoiding
   # race conditions, but it's good enough.
+  # This can probably be removed
   if hostname != leader_info["holderIdentity"].split("_")[0]
     return
   end
@@ -71,7 +69,7 @@ Facter.add(:slate) do
   if cluster_config.key?("controlPlaneEndpoint")
     cpe = cluster_config["controlPlaneEndpoint"].split(":")
     res["kubernetes"]["control_plane_endpoint_hostname"] = cpe[0]
-    res["Kubernetes"]["control_plane_endpoint_port"] = cpe[1]
+    res["kubernetes"]["control_plane_endpoint_port"] = cpe[1]
   # The cluster is a single availability cluster.
   else
     cluster_status["apiEndpoints"].each_pair do |api_hostname, value|
