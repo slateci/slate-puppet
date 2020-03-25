@@ -19,7 +19,6 @@ class slate::accounts (
   Accounts::User::Resource $user_defaults,
   Boolean $passwordless_sudo,
 ) {
-  include accounts
   $user_accounts.each |Accounts::User::Name $username, Accounts::User::Resource $resource| {
     ensure_resource('accounts::user', $username, $user_defaults + $resource)
   }
