@@ -47,7 +47,8 @@ slate::accounts::user_accounts:
     sshkeys:
     - 'ssh-rsa AAAAB3NzaC1yc2EAAAADAQABAAABAQC7H4AeaGJ0PW8GaakfiQPMttdYFQ2uhH7TrCOYZMeoRGeeQ9DvItlpkoCZ4osn0yawRY8HYicWCx/hZss8P6r/pKIclsFauaMLDUsOwEMknFxvYjTdU04u3QGAWyr5JrXmTttNnwu4rexoCmpbDT8QiTUFMuaVSKZBLjKCj7dIkQyn6MzmDR0CwJx+wFPGgboJ1cIjl8oSj/WEfV2B9lj/8hNS8kFW+jAfFE5kY4S20aqHFA5jU/TqY4BbXHZpJHIXA0eh9TOt2rI4St3NT+AJt5g4sSUOqbhxXpkC5KzPwiQORTR923mDXcfXbKPzmvM5IfpKOAwl716VR2dINGaJ u0407846@miyako.chpc.utah.edu'
 slate::accounts::user_defaults:
-  groups: ['wheel', 'docker']
+  groups:
+  - 'slateadm'
   managehome: true
   system: false
   shell: '/bin/bash'

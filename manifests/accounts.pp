@@ -1,5 +1,5 @@
 # @summary
-#   This class creates SLATE administrator accounts.
+#   This class creates SLATE administrator accounts and places them in the 'slateadm' group.
 #
 # @see https://forge.puppet.com/puppetlabs/accounts
 #
@@ -9,15 +9,22 @@
 #   An Accounts::User::Resource containing the default settings
 #   to apply to created accounts.
 # @param passwordless_sudo
-#   If true, users in the 'wheel' group will have 'NOPASSWD: ALL' sudo privileges.
+#   If true, users in the 'slateadm' group will have 'NOPASSWD: ALL' sudo privileges.
 #
 class slate::accounts (
   Accounts::User::Hash $user_accounts,
   Accounts::User::Resource $user_defaults,
   Boolean $passwordless_sudo,
 ) {
+  group { 'slateadm':
+    ensure => present
+  }
+
   $user_accounts.each |Accounts::User::Name $username, Accounts::User::Resource $resource| {
-    ensure_resource('accounts::user', $username, $user_defaults + $resource)
+    accounts::user { $username:
+      require => Group['slateadm'],
+      *       => $user_defaults + $resource,
+    }
   }
 
   if $passwordless_sudo {
@@ -27,13 +34,13 @@ class slate::accounts (
       line   => '#includedir /etc/sudoers.d',
     }
 
-    -> file { '/etc/sudoers.d/10_wheel':
+    -> file { '/etc/sudoers.d/10_slateadm':
       ensure  => present,
       mode    => '0440',
       content => @(EOT)
-        # Allow passwordless sudo for users in 'wheel'
+        # Allow passwordless sudo for users in 'slateadm'
         # Managed by Puppet
-        %wheel ALL=(ALL) NOPASSWD: ALL
+        %slateadm ALL=(ALL) NOPASSWD: ALL
         | EOT
     }
   }
