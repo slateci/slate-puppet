@@ -4,12 +4,13 @@ require 'yaml'
 # NOTE: This fact has side-effects on the Kubernetes system.
 # It will generate discovery tokens and certificate keys.
 Facter.add(:slate) do
-  kubectl = 'kubectl --kubeconfig="/etc/kubernetes/admin.conf"'
+  kubectl_config = "/etc/kubernetes/admin.conf"
+  kubectl = 'kubectl --kubeconfig="#{kubectl_config}"'
   kubeadm = 'kubeadm'
 
   Facter::Core::Execution.execute("#{kubectl} get nodes")
 
-  if !File.exists?('/etc/kubernetes/admin.conf') or $?.exitstatus != 0
+  if !File.exists?(kubectl_config) or $?.exitstatus != 0
     return
   else
     res = {}
@@ -23,7 +24,13 @@ Facter.add(:slate) do
   # race conditions when bringing up new control nodes. This ensures only the current
   # kube-scheduler leader creates certificate keys. It's not fool-proof in avoiding
   # race conditions, but it's good enough.
-  # This can probably be removed
+  #
+  # If Kubernetes makes it possible to determine when a certificate key is still valid,
+  # this can probably be removed. For now, it's impossible to determine what the TTL
+  # of a given certificate key is.
+  #
+  # NOTE: if a hostname has "_" in it, this fails. I think it's safe to assume this
+  # will never be the case?
   if hostname != leader_info["holderIdentity"].split("_")[0]
     return
   end
@@ -70,6 +77,7 @@ Facter.add(:slate) do
     cpe = cluster_config["controlPlaneEndpoint"].split(":")
     res["kubernetes"]["control_plane_endpoint_hostname"] = cpe[0]
     res["kubernetes"]["control_plane_endpoint_port"] = cpe[1]
+    #
   # The cluster is a single availability cluster.
   else
     cluster_status["apiEndpoints"].each_pair do |api_hostname, value|
