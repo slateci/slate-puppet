@@ -75,14 +75,18 @@ Facter.add(:slate) do
   # Only present on a cluster set up as a high-availability cluster.
   if cluster_config.key?("controlPlaneEndpoint")
     cpe = cluster_config["controlPlaneEndpoint"].split(":")
-    res["kubernetes"]["control_plane_endpoint_hostname"] = cpe[0]
-    res["kubernetes"]["control_plane_endpoint_port"] = cpe[1]
+    res["kubernetes"].merge({
+      "control_plane_endpoint_hostname" => cpe[0],
+      "control_plane_endpoint_port" => cpe[1],
+    })
   # The cluster is a single availability cluster.
   else
     cluster_status["apiEndpoints"].each_pair do |api_hostname, value|
-      res["kubernetes"]["apiserver_advertise_hostname"] = api_hostname
-      res["kubernetes"]["apiserver_advertise_address"] = value["advertiseAddress"]
-      res["kubernetes"]["apiserver_advertise_port"] = value["bindPort"]
+      res["kubernetes"].merge({
+        "apiserver_advertise_hostname" => api_hostname,
+        "apiserver_advertise_address" => value["advertiseAddress"],
+        "apiserver_advertise_port" => value["bindPort"],
+      })
       break
     end
   end
