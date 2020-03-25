@@ -8,12 +8,22 @@ Facter.add(:slate) do
   kubectl = 'kubectl --kubeconfig="#{kubectl_config}"'
   kubeadm = 'kubeadm'
 
-  Facter::Core::Execution.execute("#{kubectl} get nodes")
-
-  if !File.exists?(kubectl_config) or $?.exitstatus != 0
+  kubelet_ver = Facter::Core::Execution.execute("kubelet version")
+  if $?.exitstatus != 0
     return
   else
-    res = {}
+    kubeadm_ver = Facter::Core::Execution.execute("kubeadm version -o short")
+    res["kubernetes"] = {
+      "kubelet_version" => (kubelet_ver.match(/Kubernetes v([0-9.]+)/))[1],
+      "kubeadm_version" => (kubeadm_ver.metch(/v([0-9.]+)/))[1]
+    }
+  end
+
+  if !(File.exists?(kubectl_config) and Facter::Core::Execution.execute("#{kubectl} get nodes") and $?.exitstatus == 0)
+    setcode do
+      res
+    end
+    return
   end
 
   hostname = Facter.value(:networking)["fqdn"]
@@ -32,7 +42,13 @@ Facter.add(:slate) do
   # NOTE: if a hostname has "_" in it, this fails. I think it's safe to assume this
   # will never be the case?
   if hostname != leader_info["holderIdentity"].split("_")[0]
+    res["kubernetes"]["leader"] = false
+    setcode do
+      res
+    end
     return
+  else
+    res["kubernetes"]["leader"] = true
   end
 
   certificate_key = Facter::Core::Execution.execute("#{kubeadm} init phase upload-certs --upload-certs 2>/dev/null | egrep '^\\w{64}$'")
