@@ -54,7 +54,7 @@ class slate::registration (
     confirm    => true,
   })
 
-  if $slate_cluster_name != undef and $slate_group_name != undef and $slate_org_name != undef {
+  if $slate_cluster_name and $slate_group_name and $slate_org_name {
     exec { 'join SLATE federation':
       command     => "slate cluster create '${slate_cluster_name}' ${slate_flags}",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
@@ -71,7 +71,7 @@ class slate::registration (
       ],
     }
 
-    if $slate_loc_lat != undef and $slate_loc_long != undef {
+    if $slate_loc_lat and $slate_loc_long {
       # TODO(emersonford): Make this update declarative.
       exec { 'update cluster location':
         command     => "slate cluster update '${slate_cluster_name}' --location '${slate_loc_lat},${slate_loc_long}'",
