@@ -3,9 +3,6 @@
 #
 # @see https://forge.puppet.com/puppetlabs/accounts
 #
-# @note If the username is already managed by some other Puppet module,
-#   this module will not manage the user.
-#
 # @param user_accounts
 #   An Accounts::User::Hash of users to create.
 # @param user_defaults
