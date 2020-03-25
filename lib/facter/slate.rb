@@ -77,7 +77,6 @@ Facter.add(:slate) do
     cpe = cluster_config["controlPlaneEndpoint"].split(":")
     res["kubernetes"]["control_plane_endpoint_hostname"] = cpe[0]
     res["kubernetes"]["control_plane_endpoint_port"] = cpe[1]
-    #
   # The cluster is a single availability cluster.
   else
     cluster_status["apiEndpoints"].each_pair do |api_hostname, value|
