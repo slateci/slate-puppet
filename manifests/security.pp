@@ -20,19 +20,24 @@ class slate::security (
   }
 
   if $disable_root_ssh {
-    ensure_resource('service', 'sshd', {})
+    # Allows us to restart sshd on config change.
+    exec { 'sshd-system-reload':
+      path        => '/bin',
+      command     => 'if systemctl is-active --quiet sshd; then systemctl restart sshd; fi',
+      refreshonly => true,
+    }
 
     file_line { 'PermitRootLogin no':
       line   => 'PermitRootLogin no',
       path   => '/etc/ssh/sshd_config',
-      notify => Service['sshd'],
+      notify => Exec['sshd-system-reload'],
     }
 
     file_line { 'PermitRootLogin yes':
       ensure => absent,
       line   => 'PermitRootLogin yes',
       path   => '/etc/ssh/sshd_config',
-      notify => Service['sshd'],
+      notify => Exec['sshd-system-reload'],
     }
   }
 }
