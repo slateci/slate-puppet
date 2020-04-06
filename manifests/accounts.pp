@@ -10,6 +10,7 @@
 #   to apply to created accounts.
 # @param passwordless_sudo
 #   If true, users in the 'slateadm' group will have 'NOPASSWD: ALL' sudo privileges.
+#   This enables inclusion of /etc/sudoers.d to /etc/sudoers.
 #
 class slate::accounts (
   Accounts::User::Hash $user_accounts,
