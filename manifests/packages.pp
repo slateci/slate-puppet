@@ -25,6 +25,13 @@ class slate::packages (
     environment => ['HOME=/root'],
   }
 
+  ~> exec { 'setup SLATE completions':
+    path        => ['/usr/sbin', '/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
+    command     => 'slate completion > /etc/bash_completion.d/slate',
+    refreshonly => true,
+    environment => ['HOME=/root'],
+  }
+
   if $install_dell_tools and $facts['manufacturer'] == 'Dell Inc.' {
     contain slate::dell::racadm
     contain slate::dell::dsu
