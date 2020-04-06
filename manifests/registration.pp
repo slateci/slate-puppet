@@ -2,7 +2,9 @@
 #   This class handles SLATE cluster federation registration.
 #
 # @note This class requires the SLATE CLI to have been installed and present in
-#   either '/usr', '/usr/bin', '/sbin', '/usr/local/bin'
+#   either '/usr', '/usr/bin', '/sbin', '/usr/local/bin'.
+#
+# @note This class requires /etc/kubernetes/admin.conf to be present.
 #
 # @param slate_client_token
 #   The client token obtained for your user from the SLATE portal.
@@ -59,7 +61,7 @@ class slate::registration (
       command     => "slate cluster create '${slate_cluster_name}' ${slate_flags}",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
       # Ensure only the controller runs this command.
-      onlyif      => 'kubectl get nodes $(hostname) | grep "master"',
+      onlyif      => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
       # TODO(emersonford): Use a better check for this unless.
       unless      => "slate cluster list | grep ${slate_cluster_name}",
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
