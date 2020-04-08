@@ -2,6 +2,16 @@
 #   This class handles tuning of sysctl parameters for SLATE.
 #
 class slate::tuning {
+  sysctl { 'net.ipv4.ip_forward':
+    ensure => present,
+    value  => '1',
+  }
+
+  sysctl { 'net.ipv6.conf.all.forwarding':
+    ensure => present,
+    value  => '1',
+  }
+
   sysctl { 'net.core.rmem_max':
     ensure => present,
     value  => '67108864',
