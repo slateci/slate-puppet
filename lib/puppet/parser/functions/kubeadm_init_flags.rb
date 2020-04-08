@@ -24,6 +24,7 @@ module Puppet::Parser::Functions
     flags << '--skip-token-print' if opts['skip_token_print']
     flags << "--token '#{opts['token']}'" if opts['token'] && opts['token'].to_s != 'undef'
     flags << "--token-ttl '#{opts['token_ttl']}'" if opts['token_ttl'] && opts['token_ttl'].to_s != 'undef'
+    flags << '--upload-certs' if opts['upload_certs']
 
     flags.flatten.join(' ')
   end
