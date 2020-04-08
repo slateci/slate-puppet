@@ -16,7 +16,7 @@ class slate::packages (
 
   exec { 'download SLATE CLI':
     path        => ['/usr/sbin', '/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-    command     => "curl -L https://jenkins.slateci.io/artifacts/client/slate-linux.tar.gz | tar -xz -C /usr/local/bin",
+    command     => 'curl -L https://jenkins.slateci.io/artifacts/client/slate-linux.tar.gz | tar -xz -C /usr/local/bin',
     # Do not run if the SLATE binary is present and it's version is equal to the server's reported version.
     unless      => 'test -f /usr/local/bin/slate && \
     test $(slate version | grep -Pzo "Client Version.*\\n\\K(\\d+)(?=.*)") = \
