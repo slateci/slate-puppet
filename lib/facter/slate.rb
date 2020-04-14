@@ -41,9 +41,8 @@ Facter.add(:slate) do
   # this can probably be removed. For now, it's impossible to determine what the TTL
   # of a given certificate key is.
   #
-  # NOTE: if a hostname has "_" in it, this fails. I think it's safe to assume this
-  # will never be the case?
-  if hostname != leader_info["holderIdentity"].split("_")[0]
+  # Removes the tag beginning with _ from the holderIdentity string to get the hostname.
+  if hostname != leader_info["holderIdentity"].scan(/(.+)(_[a-z0-9-]+)/)[0][0]
     res["kubernetes"]["leader"] = false
     setcode do
       res
@@ -96,7 +95,7 @@ Facter.add(:slate) do
       "control_plane_endpoint_hostname" => cpe[0],
       "control_plane_endpoint_port" => cpe[1],
     })
-    # The cluster is a single availability cluster.
+  # The cluster is a single availability cluster.
   else
     cluster_status["apiEndpoints"].each_pair do |api_hostname, value|
       res["kubernetes"] = res["kubernetes"].merge({
