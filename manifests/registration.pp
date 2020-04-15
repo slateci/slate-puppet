@@ -27,25 +27,19 @@
 #   this is not fully declarative and is only run on the initial SLATE cluster registration.
 #
 class slate::registration (
-  String $slate_client_token,
-  String $slate_cluster_name,
-  String $slate_group_name,
-  String $slate_org_name,
-  String $slate_endpoint_url = 'https://api.slateci.io:18080',
+  Optional[String] $slate_client_token,
+  Optional[String] $slate_cluster_name,
+  Optional[String] $slate_group_name,
+  Optional[String] $slate_org_name,
   Boolean $ingress_enabled = true,
   Optional[String] $slate_loc_lat,
   Optional[String] $slate_loc_long,
 ) {
-  if $slate_client_token != undef {
-    file { '/root/.slate':
-      ensure => directory,
-    }
+  if $slate_client_token {
+    ensure_resource('file', '/root/.slate', { 'ensure' => 'directory' })
     -> file { '/root/.slate/token':
       content => $slate_client_token,
       mode    => '0600',
-    }
-    -> file { '/root/.slate/endpoint':
-      content => $slate_endpoint_url,
     }
   }
 
@@ -60,7 +54,7 @@ class slate::registration (
     exec { 'join SLATE federation':
       command     => "slate cluster create '${slate_cluster_name}' ${slate_flags}",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-      # Ensure only the controller runs this command.
+      # TODO(emersonford): Ensure only the leader runs this command.
       onlyif      => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
       # TODO(emersonford): Use a better check for this unless.
       unless      => "slate cluster list | grep ${slate_cluster_name}",
