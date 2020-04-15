@@ -4,11 +4,15 @@ require 'shellwords'
 #
 module Puppet::Parser::Functions
   # Transforms a hash into a string of kubeadm init flags
-  newfunction(:kubeadm_join_flags, :type => :rvalue) do |args|
+  newfunction(:kubeadm_join_flags, type: :rvalue) do |args|
     opts = args[0] || {}
     flags = []
     flags << "'#{opts['controller_address']}'" if opts['controller_address'] && opts['controller_address'].to_s != 'undef'
+    flags << "--apiserver-advertise-address '#{opts['apiserver_advertise_address']}'" if opts['apiserver_advertise_address'] && opts['apiserver_advertise_address'].to_s != 'undef'
+    flags << "--apiserver-bind-port '#{opts['apiserver_bind_port']}'" if opts['apiserver_bind_port'] && opts['apiserver_bind_port'].to_s != 'undef'
+    flags << "--certificate-key '#{opts['certificate_key']}'" if opts['certificate_key'] && opts['certificate_key'].to_s != 'undef'
     flags << "--config '#{opts['config']}'" if opts['config'] && opts['config'].to_s != 'undef'
+    flags << '--control-plane' if opts['control_plane']
     flags << "--cri-socket '#{opts['cri_socket']}'" if opts['cri_socket'] && opts['cri_socket'].to_s != 'undef'
     flags << "--discovery-file '#{opts['discovery_file']}'" if opts['discovery_file'] && opts['discovery_file'].to_s != 'undef'
     flags << "--discovery-token '#{opts['discovery_token']}'" if opts['discovery_token'] && opts['discovery_token'].to_s != 'undef'

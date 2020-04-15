@@ -4,7 +4,7 @@ require 'shellwords'
 #
 module Puppet::Parser::Functions
   # Transforms a hash into a string of kubeadm init flags
-  newfunction(:kubeadm_init_flags, :type => :rvalue) do |args|
+  newfunction(:kubeadm_init_flags, type: :rvalue) do |args|
     opts = args[0] || {}
     flags = []
     flags << "--apiserver-advertise-address '#{opts['apiserver_advertise_address']}'" if opts['apiserver_advertise_address'] && opts['apiserver_advertise_address'].to_s != 'undef'
@@ -12,7 +12,7 @@ module Puppet::Parser::Functions
     flags << "--apiserver-cert-extra-sans '#{opts['apiserver_cert_extra_sans'].join(',')}'" if opts['apiserver_cert_extra_sans'] && opts['apiserver_cert_extra_sans'].to_s != 'undef'
     flags << "--cert-dir '#{opts['cert_dir']}'" if opts['cert_dir'] && opts['cert_dir'].to_s != 'undef'
     flags << "--config '#{opts['config']}'" if opts['config'] && opts['config'].to_s != 'undef'
-    flags << "--control-plane-endpoint=\"#{opts['control_plane_endpoint']}\"" if opts['control_plane_endpoint'] && opts['control_plane_endpoint'].to_s != 'undef'
+    flags << "--control-plane-endpoint '#{opts['control_plane_endpoint']}'" if opts['control_plane_endpoint'] && opts['control_plane_endpoint'].to_s != 'undef'
     flags << "--cri-socket '#{opts['cri_socket']}'" if opts['cri_socket'] && opts['cri_socket'].to_s != 'undef'
     flags << '--dry-run' if opts['dry_run']
     flags << "--feature-gates '#{opts['feature_gates'].join(',')}'" if opts['feature_gates'] && opts['feature_gates'].to_s != 'undef'
