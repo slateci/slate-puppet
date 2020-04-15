@@ -9,4 +9,4 @@ data:
     - name: default
       protocol: layer2
       addresses:
-      - <%= $slate::kubeadm::post::metallb_start_ip_range %>-<%= $slate::kubeadm::post::metallb_end_ip_range %>
+      - <%= $start_ip_range %>-<%= $end_ip_range %>

@@ -1,10 +1,12 @@
 ---
-slate::kubeadm::packages::k8s_version: '1.17.4'
-slate::kubeadm::packages::docker_version: '19.03.8'
-slate::kubeadm::post::cni_network_provider: 'https://docs.projectcalico.org/v3.13/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml'
-slate::kubeadm::post::metallb_url: 'https://raw.githubusercontent.com/google/metallb/v0.8.1/manifests/metallb.yaml'
-slate::kubeadm::post::metallb_start_ip_range:
-slate::kubeadm::post::metallb_end_ip_range:
+slate::kubernetes::initial_controller:
+slate::kubernetes::controller:
+slate::kubernetes::worker:
+slate::kubernetes::controller_hostname:
+slate::kubernetes::metallb::start_ip_range:
+slate::kubernetes::metallb::end_ip_range:
+slate::kubernetes::metallb::namespace_url: 'https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml'
+slate::kubernetes::metallb::manifest_url: 'https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml'
 slate::registration::slate_client_token:
 slate::registration::slate_cluster_name:
 slate::registration::slate_group_name:

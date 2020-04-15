@@ -12,38 +12,27 @@
 #
 class slate (
   Boolean $create_slate_admin_accounts = true,
-  Boolean $single_node_cluster = true,
-  String $slate_tmp_dir = '/tmp/slate',
+  Boolean $use_puppetlabs_kubernetes = false,
 ) {
-  if $single_node_cluster {
-    contain slate::packages
-    contain slate::tuning
-    contain slate::security
-    contain slate::kubeadm::packages
-    contain slate::kubeadm::pre
-    contain slate::kubeadm::run_init
-    contain slate::kubeadm::post
-    contain slate::registration
+  # TODO(emersonford): Ensure only the kube-scheduler master runs the SLATE registration.
+  # if fact('slate.kubernetes.leader_acquire_time') ...
+  contain slate::packages
+  contain slate::tuning
+  contain slate::security
+  contain slate::registration
 
-    Class['slate::packages']
-    -> Class['slate::tuning']
-    -> Class['slate::security']
-    -> Class['slate::kubeadm::packages']
-    -> Class['slate::kubeadm::pre']
-    -> Class['slate::kubeadm::run_init']
-    -> Class['slate::kubeadm::post']
-    -> Class['slate::registration']
+  Class['slate::packages']
+  -> Class['slate::tuning']
+  -> Class['slate::security']
+  -> Class['slate::registration']
+
+  if $use_puppetlabs_kubernetes {
+    require kubernetes
   }
-
   else {
-    contain slate::packages
-    contain slate::tuning
-    contain slate::security
-    contain slate::registration
+    contain slate::kubernetes
 
-    Class['slate::packages']
-    -> Class['slate::tuning']
-    -> Class['slate::security']
+    Class['slate::kubernetes']
     -> Class['slate::registration']
   }
 
