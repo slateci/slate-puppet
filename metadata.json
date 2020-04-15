@@ -13,6 +13,10 @@
       "version_requirement": ">= 4.20.0 < 7.0.0"
     },
     {
+      "name": "puppetlabs-accounts",
+      "version_requirement": ">= 6.1.0 < 7.0.0"
+    },
+    {
       "name": "puppetlabs-docker",
       "version_requirement": ">= 3.9.1 < 4.0.0"
     },
