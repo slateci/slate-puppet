@@ -23,7 +23,7 @@ class slate::security (
     # Allows us to restart sshd on config change.
     exec { 'sshd-system-reload':
       path        => '/bin',
-      command     => 'if systemctl is-active --quiet sshd; then systemctl restart sshd; fi',
+      command     => 'systemctl is-active --quiet sshd || exit 0; systemctl restart sshd',
       refreshonly => true,
     }
 
