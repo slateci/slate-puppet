@@ -83,7 +83,8 @@ class slate::kubernetes::kubeadm_join (
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
       logoutput   => true,
       timeout     => 0,
-      unless      => "kubectl get nodes | grep ${node_name}",
+      # TODO(emersonford): Investigate better ways to detect if a worker is a part of a cluster.
+      unless      => "cat /etc/kubernetes/kubelet.conf | grep '${controller_hostname}:${controller_port}'",
     }
   }
 }
