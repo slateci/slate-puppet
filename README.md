@@ -2,6 +2,8 @@
 
 A Puppet module that configures a Kubernetes cluster to be SLATE-ready.
 
+THIS README IS OUT OF DATE AS OF 2020/04/15.
+
 #### Table of Contents
 
 1. [Description](#description)
