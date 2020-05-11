@@ -1,29 +1,48 @@
 require 'json'
 require 'yaml'
+require 'English'
 
 # NOTE: This fact has side-effects on the Kubernetes system.
 # It will generate discovery tokens and certificate keys.
 Facter.add(:slate) do
   kubectl_config = '/etc/kubernetes/admin.conf'
+  kubelet_config = '/etc/kubernetes/kubelet.conf'
   kubectl = "kubectl --kubeconfig='#{kubectl_config}'"
   kubeadm = 'kubeadm'
   res = {}
 
-  Facter::Core::Execution.execute('yum list installed | grep kubelet')
-  return unless $?.exitstatus.zero?
+  Facter::Core::Execution.execute('systemctl is-active --quiet kubelet')
+  return unless $CHILD_STATUS.exitstatus.zero?
+  return unless File.exist?(kubelet_config)
 
-  Facter::Core::Execution.execute('yum list installed | grep kubeadm')
-  return unless $?.exitstatus.zero?
-
+  # Grab information about kubelet.
   kubelet_ver = Facter::Core::Execution.execute('kubelet --version')
-  kubeadm_ver = Facter::Core::Execution.execute('kubeadm version -o short')
+
+  kubelet_yaml = YAML.safe_load(File.read(kubelet_config))
+  return unless kubelet_yaml['clusters'].length == 1
+  cluster_host, cluster_port = kubelet_yaml['clusters'][0]['cluster']['server'].match(%r{https://(.+):(.+)})[1, 2]
+
   res['kubernetes'] = {
-    'kubelet_version' => kubelet_ver.match(/Kubernetes v([0-9.]+)/)[1],
-    'kubeadm_version' => kubeadm_ver.match(/v([0-9.]+)/)[1],
+    'kubelet_version'      => kubelet_ver.match(%r{Kubernetes v([0-9.]+)})[1],
+    'kubelet_cluster_host' => cluster_host,
+    'kubelet_cluster_port' => cluster_port,
   }
 
+  # Check if we have kubeadm installed here.
+  Facter::Core::Execution.execute('yum list installed | grep kubeadm')
+  if $CHILD_STATUS.exitstatus != 0
+    setcode do
+      res
+    end
+    return
+  end
+
+  kubeadm_ver = Facter::Core::Execution.execute('kubeadm version -o short')
+  res['kubernetes']['kubeadm_version'] = kubeadm_ver.match(%r{v([0-9.]+)})[1]
+
+  # Check if we have kubectl installed here.
   Facter::Core::Execution.execute("#{kubectl} get nodes")
-  if $?.exitstatus != 0
+  if $CHILD_STATUS.exitstatus != 0
     setcode do
       res
     end
@@ -44,7 +63,7 @@ Facter.add(:slate) do
   # of a given certificate key is.
   #
   # Removes the tag beginning with _ from the holderIdentity string to get the hostname.
-  if hostname != leader_info['holderIdentity'].scan(/(.+)(_[a-z0-9-]+)/)[0][0]
+  if hostname != leader_info['holderIdentity'].scan(%r{(.+)(_[a-z0-9-]+)})[0][0]
     res['kubernetes']['leader'] = false
     setcode do
       res
@@ -66,7 +85,7 @@ Facter.add(:slate) do
   # Check if we already have a valid discovery token to pass out.
   discovery_tokens.each_line do |line|
     token, ttl = line.split(' ')
-    if ttl =~ /\d+h/
+    if ttl =~ %r{\d+h}
       discovery_token = token
       break
     end
