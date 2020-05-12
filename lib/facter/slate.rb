@@ -41,6 +41,14 @@ Facter.add(:slate) do
   res['kubernetes']['kubeadm_version'] = kubeadm_ver.match(%r{v([0-9.]+)})[1]
 
   # Check if we have kubectl installed here.
+  Facter::Core::Execution.execute('yum list installed | grep kubectl')
+  if $CHILD_STATUS.exitstatus != 0
+    setcode do
+      res
+    end
+    return
+  end
+
   Facter::Core::Execution.execute("#{kubectl} get nodes")
   if $CHILD_STATUS.exitstatus != 0
     setcode do
@@ -117,6 +125,7 @@ Facter.add(:slate) do
       'control_plane_endpoint_hostname' => cpe[0],
       'control_plane_endpoint_port' => cpe[1].to_i,
     )
+
   # The cluster is a single availability cluster.
   else
     cluster_status['apiEndpoints'].each_pair do |api_hostname, value|
