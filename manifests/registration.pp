@@ -3,7 +3,8 @@
 #
 # @note This class requires /etc/kubernetes/admin.conf to be present.
 #
-# @note Requires the slate::cli class.
+# @note Requires the SLATE CLI to be installed in /usr/local/bin.
+#   This can be accomplished with the slate::cli class.
 #
 # @param slate_cluster_name
 #   The name to register your cluster as.
@@ -31,7 +32,6 @@ class slate::registration (
 ) {
   # TODO(emersonford): Make registration declarative, i.e. if registration is set to false
   # we delete the cluster from SLATE.
-  require slate::cli
 
   $slate_flags = slate_create_flags({
     no_ingress => !$ingress_enabled,

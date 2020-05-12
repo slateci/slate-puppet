@@ -2,7 +2,7 @@
 #
 # Main class, includes all other classes.
 #
-# @param create_slate_admin_accounts
+# @param manage_slate_admin_accounts
 #   Includes the slate::accounts class to create SLATE administrator accounts.
 # @param manage_kubernetes
 #   Includes the slate::kubernetes class to setup Kubernetes on this node.
@@ -10,7 +10,7 @@
 #   Install the SLATE CLI and register this cluster with SLATE.
 #
 class slate (
-  Boolean $create_slate_admin_accounts = true,
+  Boolean $manage_slate_admin_accounts = true,
   Boolean $manage_kubernetes = true,
   Boolean $register_with_slate = true,
 ) {
@@ -19,10 +19,6 @@ class slate (
   contain slate::packages
   contain slate::tuning
   contain slate::security
-
-  Class['slate::packages']
-  -> Class['slate::tuning']
-  -> Class['slate::security']
 
   if $register_with_slate {
     contain slate::registration
@@ -34,16 +30,13 @@ class slate (
   if $manage_kubernetes {
     contain slate::kubernetes
 
-    Class['slate::security']
-    -> Class['slate::kubernetes']
-
     if $register_with_slate {
       Class['slate::kubernetes']
       -> Class['slate::registration']
     }
   }
 
-  if $create_slate_admin_accounts {
+  if $manage_slate_admin_accounts {
     contain slate::accounts
   }
 }

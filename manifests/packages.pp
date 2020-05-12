@@ -10,6 +10,8 @@ class slate::packages (
   Boolean $install_dell_tools = true,
   Array $package_list = ['htop', 'strace', 'tmux', 'iftop', 'screen', 'sysstat', 'jq', 'curl'],
 ) {
+  contain slate::cli
+
   package { $package_list:
     ensure => latest,
   }

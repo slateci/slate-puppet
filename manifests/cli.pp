@@ -10,6 +10,15 @@ class slate::cli (
   String $slate_client_token,
   String $slate_endpoint_url = 'https://api.slateci.io:18080',
 ) {
+  ensure_resources('package', {
+    'jq' => {
+      ensure => latest,
+    },
+    'curl' => {
+      ensure => latest,
+    }
+  })
+
   file { '/root/.slate':
     ensure => directory,
   }
@@ -31,6 +40,10 @@ class slate::cli (
     $(curl -L https://jenkins.slateci.io/artifacts/client/latest.json | \
     jq -r ".[0].version")',
     environment => ['HOME=/root'],
+    require     => [
+      Package['jq'],
+      Package['curl'],
+    ],
   }
 
   ~> exec { 'setup SLATE completions':
