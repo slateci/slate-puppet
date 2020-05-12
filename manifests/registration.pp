@@ -1,21 +1,16 @@
 # @summary
 #   This class handles SLATE cluster federation registration.
 #
-# @note This class requires the SLATE CLI to have been installed and present in
-#   either '/usr', '/usr/bin', '/sbin', '/usr/local/bin'.
-#
 # @note This class requires /etc/kubernetes/admin.conf to be present.
 #
-# @param slate_client_token
-#   The client token obtained for your user from the SLATE portal.
+# @note Requires the slate::cli class.
+#
 # @param slate_cluster_name
 #   The name to register your cluster as.
 # @param slate_group_name
 #   The group name to register your cluster under.
 # @param slate_org_name
 #   The organization name to register your cluster under.
-# @param slate_endpoint_url
-#   The API endpoint for the SLATE CLI.
 # @param ingress_enabled
 #   Set to false if you do not have an ingress controller installed
 #   on your Kubernetes cluster (e.g. MetalLB).
@@ -27,21 +22,16 @@
 #   this is not fully declarative and is only run on the initial SLATE cluster registration.
 #
 class slate::registration (
-  Optional[String] $slate_client_token,
-  Optional[String] $slate_cluster_name,
-  Optional[String] $slate_group_name,
-  Optional[String] $slate_org_name,
+  String $slate_cluster_name,
+  String $slate_group_name,
+  String $slate_org_name,
   Boolean $ingress_enabled = true,
   Optional[String] $slate_loc_lat,
   Optional[String] $slate_loc_long,
 ) {
-  if $slate_client_token {
-    ensure_resource('file', '/root/.slate', { 'ensure' => 'directory' })
-    -> file { '/root/.slate/token':
-      content => $slate_client_token,
-      mode    => '0600',
-    }
-  }
+  # TODO(emersonford): Make registration declarative, i.e. if registration is set to false
+  # we delete the cluster from SLATE.
+  require slate::cli
 
   $slate_flags = slate_create_flags({
     no_ingress => !$ingress_enabled,
@@ -54,17 +44,12 @@ class slate::registration (
     exec { 'join SLATE federation':
       command     => "slate cluster create '${slate_cluster_name}' ${slate_flags}",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-      # TODO(emersonford): Ensure only the leader runs this command.
       onlyif      => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
       # TODO(emersonford): Use a better check for this unless.
       unless      => "slate cluster list | grep ${slate_cluster_name}",
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
       timeout     => 300,
       notify      => Exec['update cluster location'],
-      require     => [
-        File['/root/.slate/token'],
-        File['/root/.slate/endpoint'],
-      ],
     }
 
     if $slate_loc_lat and $slate_loc_long {
