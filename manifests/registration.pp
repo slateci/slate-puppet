@@ -49,6 +49,8 @@ class slate::registration (
     mode    => '0600',
   }
 
+  # This will fail is kubectl is working, providing feedback as to why SLATE cluster creation
+  # may not be working.
   exec { 'check kubectl is working':
       command     => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],

@@ -1,5 +1,6 @@
 # @summary
 #   This class creates SLATE administrator accounts and places them in the 'slateadm' group.
+#   Which is created if not present.
 #
 # @see https://forge.puppet.com/puppetlabs/accounts
 #
