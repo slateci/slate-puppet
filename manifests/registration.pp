@@ -4,6 +4,7 @@
 # @note This class requires /etc/kubernetes/admin.conf to be present.
 #
 # @note Requires the SLATE CLI to be installed in /usr/local/bin.
+#   With the endpoint file and client token file present in /root/.slate.
 #   This can be accomplished with the slate::cli class.
 #
 # @param slate_cluster_name
@@ -41,10 +42,15 @@ class slate::registration (
   })
 
   if $slate_cluster_name and $slate_group_name and $slate_org_name {
-    exec { 'join SLATE federation':
+    exec { 'check kubectl is working':
+      command     => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
+      path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
+      environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+    }
+
+    -> exec { 'join SLATE federation':
       command     => "slate cluster create '${slate_cluster_name}' ${slate_flags}",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-      onlyif      => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
       # TODO(emersonford): Use a better check for this unless.
       unless      => "slate cluster list | grep ${slate_cluster_name}",
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
