@@ -25,12 +25,7 @@ class slate::kubernetes (
   Hash[Pattern[/\A[a-z_]+/], Variant[String, Boolean]] $kubeadm_join_flags = {},
   String $cni_network_provider_url = 'https://docs.projectcalico.org/v3.13/getting-started/kubernetes/installation/hosted/kubernetes-datastore/calico-networking/1.7/calico.yaml',
 ) {
-  if $facts['os']['family'] != 'RedHat' or $facts['os']['release']['major'] != '7' {
-    fail('This module is only supported on RedHat 7/CentOS 7.')
-  }
-
   # TODO(emersonford): Add checks for existing cluster for init.
-  # Change booleans to enums for initial_controller, controller, etc.
   # TODO(emersonford): Add updates for MetalLB and Calico.
 
   contain slate::kubernetes::packages

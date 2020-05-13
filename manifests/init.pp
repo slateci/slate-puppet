@@ -14,6 +14,10 @@ class slate (
   Boolean $register_with_slate = true,
   Boolean $manage_slate_admin_accounts = true,
 ) {
+  if $facts['os']['family'] != 'RedHat' or $facts['os']['release']['major'] != '7' {
+    fail('This module is only supported on RedHat 7/CentOS 7.')
+  }
+
   contain slate::packages
   contain slate::tuning
   contain slate::security
