@@ -19,9 +19,11 @@ Facter.add(:slate) do
   kubelet_ver = Facter::Core::Execution.execute('kubelet --version')
 
   kubelet_yaml = YAML.safe_load(File.read(kubelet_config))
-  return unless kubelet_yaml['clusters'].length == 1
+  return unless kubelet_yaml['clusters'].length > 0
   cluster_host, cluster_port = kubelet_yaml['clusters'][0]['cluster']['server'].match(%r{https://(.+):(.+)})[1, 2]
 
+  # This also allows us to check if a node has been joined to a cluster.
+  # If `fact('slate.kubernetes.cluster_host') == undef` then the node has not been joined to a cluster.
   res['kubernetes'] = {
     'kubelet_version'      => kubelet_ver.match(%r{Kubernetes v([0-9.]+)})[1],
     'kubelet_cluster_host' => cluster_host,
