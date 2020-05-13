@@ -1,13 +1,10 @@
 # @summary
 #   This class handles installation of the SLATE CLI.
 #
-# @param slate_client_token
-#   The client token obtained for your user from the SLATE portal.
 # @param slate_endpoint_url
 #   The endpoint to use for the SLATE CLI.
 #
 class slate::cli (
-  String $slate_client_token,
   String $slate_endpoint_url = 'https://api.slateci.io:18080',
 ) {
   ensure_resources('package', {
@@ -24,10 +21,6 @@ class slate::cli (
   }
   -> file { '/root/.slate/endpoint':
     content => $slate_endpoint_url,
-    mode    => '0600',
-  }
-  -> file { '/root/.slate/token':
-    content => $slate_client_token,
     mode    => '0600',
   }
 
