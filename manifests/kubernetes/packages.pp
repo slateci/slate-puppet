@@ -1,19 +1,17 @@
 # @summary
 #   This class handles installation of Docker and Kubernetes packages.
 #
-# @api private
-#
 # @param install_kubectl
-#   If true installs kubectl.
+#   If true installs kubectl. By default, this is only true on controller nodes.
 # @param kubernetes_version
-#   The version of the Kubernetes packages to install.
+#   See slate::kubernetes::kubernetes_version.
 # @param docker_version
-#   The version of Docker to install.
+#   See slate::kubernetes::docker_version.
 # @param docker_cgroup_driver
-#   The cgroup driver to use for Docker.
+#   See slate::kubernetes::cgroup_driver.
 #
 class slate::kubernetes::packages (
-  Boolean $install_kubectl = $slate::kubernetes::install_kubectl,
+  Boolean $install_kubectl = $slate::kubernetes::role =~ /controller/,
   String $kubernetes_version = $slate::kubernetes::kubernetes_version,
   String $docker_version = $slate::kubernetes::docker_version,
   String $docker_cgroup_driver = $slate::kubernetes::cgroup_driver,
