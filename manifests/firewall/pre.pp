@@ -33,7 +33,7 @@ class slate::firewall::pre {
   -> firewall { '004 rate-limit SSH to 4 connections/5 minutes':
     dport     => 22,
     proto     => 'tcp',
-    state     => ['NEW'],
+    state     => 'NEW',
     recent    => 'update',
     rseconds  => 300,
     rhitcount => 4,
@@ -45,7 +45,7 @@ class slate::firewall::pre {
   -> firewall { '005 set SSH rate-limit':
     dport   => 22,
     proto   => 'tcp',
-    state   => ['NEW'],
+    state   => 'NEW',
     recent  => 'set',
     rname   => 'SSHRATELIM',
     rsource => true,
@@ -84,7 +84,7 @@ class slate::firewall::pre {
   -> firewall { '004 rate-limit SSH to 4 connections/5 minutes (v6)':
     dport     => 22,
     proto     => 'tcp',
-    state     => ['NEW'],
+    state     => 'NEW',
     action    => 'reject',
     reject    => 'icmp6-adm-prohibited',
     recent    => 'update',
@@ -97,7 +97,7 @@ class slate::firewall::pre {
   -> firewall { '005 set SSH rate-limit (v6)':
     dport    => 22,
     proto    => 'tcp',
-    state    => ['NEW'],
+    state    => 'NEW',
     recent   => 'set',
     rname    => 'SSHRATELIM',
     rsource  => true,
@@ -112,7 +112,7 @@ class slate::firewall::pre {
   -> firewall { '007 allow dhcpv6-client (v6)':
     dport       => 546,
     proto       => 'udp',
-    state       => ['NEW'],
+    state       => 'NEW',
     action      => 'accept',
     destination => 'fe80::/64',
     provider    => 'ip6tables',
