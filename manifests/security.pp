@@ -2,6 +2,11 @@
 #   This class handles setting specific security settings required per node for SLATE.
 #   This module will manage some firewall rules through iptables (ergo disabling firewalld).
 #
+# @note The firewall module will order rules starting with '000' to '899' before unmanaged rules.
+#   Rules starting with '900' to '999' will be placed after unmanaged rules.
+#
+# @see https://github.com/puppetlabs/puppetlabs-firewall
+#
 # @param disable_root_ssh
 #   If true, ensures 'PermitRootLogin no' is set in `/etc/ssh/sshd_config`.
 #   If false, ensures 'PermitRootLogin yes' is set in `/etc/ssh/sshd_config`.
@@ -37,6 +42,7 @@ class slate::security (
     ]
   }
 
+  # Per instructions in https://github.com/puppetlabs/puppetlabs-firewall
   Firewall {
     before  => Class['slate::firewall::post'],
     require => Class['slate::firewall::pre'],
