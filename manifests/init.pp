@@ -4,13 +4,14 @@
 #
 # @param manage_kubernetes
 #   Includes the slate::kubernetes class to setup Kubernetes on this node.
+#   apply_security_policy must be set to true if this is set to true.
 # @param register_with_slate
 #   Install the SLATE CLI and register this cluster with SLATE.
 # @param apply_security_policy
 #   Applies the SLATE provided security policy. This will disable firewalld in favor of iptables.
 #   This is required for manage_kubernetes.
 # @param manage_slate_admin_accounts
-#   Includes the slate::accounts class to create SLATE administrator accounts.
+#   Includes the slate::accounts class to manage SLATE administrator accounts.
 #
 class slate (
   Boolean $manage_kubernetes = true,

@@ -1,6 +1,9 @@
 # @summary
 #   This class handles tuning of sysctl parameters for SLATE.
 #
+# @param tuning_sysctl_path
+#   Path to store tuning sysctl parameters.
+#
 class slate::tuning (
   String $tuning_sysctl_path = '/etc/sysctl.d/fasterdata.conf',
 ) {

@@ -1,5 +1,5 @@
 # @summary
-#   This class handles installation of SLATE required packages.
+#   This class handles installation of SLATE required packages and the SLATE CLI.
 #
 # @param install_dell_tools
 #   Installs RACADM and dsu if the manufacturer is 'Dell Inc.'
