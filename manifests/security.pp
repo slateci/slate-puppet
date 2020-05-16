@@ -1,19 +1,14 @@
 # @summary
 #   This class handles setting specific security settings required per node for SLATE.
 #   This module will manage some firewall rules through iptables (ergo disabling firewalld).
+#   This module will also disable root login through SSH.
 #
 # @note The firewall module will order rules starting with '000' to '899' before unmanaged rules.
 #   Rules starting with '900' to '999' will be placed after unmanaged rules.
 #
 # @see https://github.com/puppetlabs/puppetlabs-firewall
 #
-# @param disable_root_ssh
-#   If true, ensures 'PermitRootLogin no' is set in `/etc/ssh/sshd_config`.
-#   If false, ensures 'PermitRootLogin yes' is set in `/etc/ssh/sshd_config`.
-#
-class slate::security (
-  Boolean $disable_root_ssh = true,
-) {
+class slate::security {
   include 'slate::firewall::pre'
   include 'slate::firewall::post'
 
@@ -48,27 +43,15 @@ class slate::security (
     require => Class['slate::firewall::pre'],
   }
 
+  file_line { 'PermitRootLogin no':
+    line  => 'PermitRootLogin no',
+    path  => '/etc/ssh/sshd_config',
+    match => '^PermitRootLogin[\w ]*$',
+  }
   # Allows us to restart sshd on config change without managing the SSHD service via Puppet.
-  exec { 'sshd-system-reload':
+  ~> exec { 'sshd-system-reload':
     path        => '/bin',
     command     => 'systemctl is-active --quiet sshd || exit 0; systemctl reload sshd',
     refreshonly => true,
-  }
-
-  if $disable_root_ssh {
-    file_line { 'PermitRootLogin no':
-      line   => 'PermitRootLogin no',
-      path   => '/etc/ssh/sshd_config',
-      match  => '^PermitRootLogin[\w ]*$',
-      notify => Exec['sshd-system-reload'],
-    }
-  }
-  else {
-    file_line { 'PermitRootLogin yes':
-      line   => 'PermitRootLogin yes',
-      path   => '/etc/ssh/sshd_config',
-      match  => '^PermitRootLogin[\w ]*$',
-      notify => Exec['sshd-system-reload'],
-    }
   }
 }

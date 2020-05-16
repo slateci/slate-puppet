@@ -1,14 +1,14 @@
 # @summary
 #   This class handles installation of SLATE required packages and the SLATE CLI.
 #
-# @param install_dell_tools
-#   Installs RACADM and dsu if the manufacturer is 'Dell Inc.'
 # @param package_list
 #   The list of package names to install.
+# @param install_dell_tools
+#   Installs RACADM and dsu if the manufacturer is 'Dell Inc.'
 #
 class slate::packages (
+  Array $package_list,
   Boolean $install_dell_tools = true,
-  Array $package_list = ['htop', 'strace', 'tmux', 'iftop', 'screen', 'sysstat', 'jq', 'curl'],
 ) {
   contain slate::cli
 

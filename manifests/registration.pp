@@ -7,49 +7,45 @@
 #   With the endpoint file present in /root/.slate.
 #   This can be accomplished by requiring the slate::cli class.
 #
-# @param slate_client_token
+# @param client_token
 #   The client token obtained for your user from the SLATE portal.
-# @param slate_cluster_name
+# @param cluster_name
 #   The name to register your cluster as.
-# @param slate_group_name
+# @param group_name
 #   The group name to register your cluster under.
-# @param slate_org_name
+# @param org_name
 #   The organization name to register your cluster under.
+# @param cluster_location
+#   The location of your cluster, the string should be of the form "[LATTITUDE],[LONGITUDE]".
+#   Due to SLATE CLI limitations, this is not fully declarative and is only run on the initial SLATE cluster registration.
 # @param ingress_enabled
 #   Set to false if you do not have an ingress controller installed
 #   on your Kubernetes cluster (e.g. MetalLB).
-# @param slate_loc_lat
-#   The latitude of your SLATE cluster location. Due to SLATE CLI limitations,
-#   this is not fully declarative and is only run on the initial SLATE cluster registration.
-# @param slate_loc_long
-#   The longitude of your SLATE cluster location. Due to SLATE CLI limitations,
-#   this is not fully declarative and is only run on the initial SLATE cluster registration.
 #
 class slate::registration (
-  String $slate_client_token,
-  String $slate_cluster_name,
-  String $slate_group_name,
-  String $slate_org_name,
+  String $client_token,
+  String $cluster_name,
+  String $group_name,
+  String $org_name,
+  Optional[String] $cluster_location,
   Boolean $ingress_enabled = true,
-  Optional[String] $slate_loc_lat,
-  Optional[String] $slate_loc_long,
 ) {
   # TODO(emersonford): Make registration declarative, i.e. if registration is set to false
   # we delete the cluster from SLATE.
 
-  $slate_flags = slate_create_flags({
+  $cli_flags = slate_create_flags({
     no_ingress => !$ingress_enabled,
-    group      => $slate_group_name,
-    org        => $slate_org_name,
+    group      => $group_name,
+    org        => $org_name,
     confirm    => true,
   })
 
   file { '/root/.slate/token':
-    content => $slate_client_token,
+    content => $client_token,
     mode    => '0600',
   }
 
-  # This will fail is kubectl is working, providing feedback as to why SLATE cluster creation
+  # This will fail if kubectl is not working, providing feedback as to why SLATE cluster creation
   # may not be working.
   exec { 'check kubectl is working':
       command     => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
@@ -58,20 +54,20 @@ class slate::registration (
   }
 
   -> exec { 'join SLATE federation':
-    command     => "slate cluster create '${slate_cluster_name}' ${slate_flags}",
+    command     => "slate cluster create '${cluster_name}' ${cli_flags}",
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     # TODO(emersonford): Use a better check for this unless.
-    unless      => "slate cluster list | grep ${slate_cluster_name}",
+    unless      => "slate cluster list | grep ${cluster_name}",
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
     timeout     => 300,
     notify      => Exec['update cluster location'],
     require     => File['/root/.slate/token'],
   }
 
-  if $slate_loc_lat and $slate_loc_long {
+  if $cluster_location {
     # TODO(emersonford): Make this update declarative.
     exec { 'update cluster location':
-      command     => "slate cluster update '${slate_cluster_name}' --location '${slate_loc_lat},${slate_loc_long}'",
+      command     => "slate cluster update '${cluster_name}' --location '${cluster_location}'",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
       refreshonly => true,

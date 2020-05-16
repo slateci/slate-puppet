@@ -1,11 +1,11 @@
 # @summary
 #   This class handles installation of the SLATE CLI.
 #
-# @param slate_endpoint_url
+# @param endpoint_url
 #   The endpoint to use for the SLATE CLI.
 #
 class slate::cli (
-  String $slate_endpoint_url = 'https://api.slateci.io:18080',
+  String $endpoint_url = 'https://api.slateci.io:18080',
 ) {
   ensure_resources('package', {
     'jq' => {

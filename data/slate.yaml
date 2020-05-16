@@ -1,19 +1,19 @@
 ---
-slate::kubernetes::initial_controller:
-slate::kubernetes::controller:
-slate::kubernetes::worker:
-slate::kubernetes::controller_hostname:
-slate::kubernetes::metallb::start_ip_range:
-slate::kubernetes::metallb::end_ip_range:
-slate::kubernetes::metallb::namespace_url: 'https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml'
-slate::kubernetes::metallb::manifest_url: 'https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml'
-slate::registration::slate_client_token:
-slate::registration::slate_cluster_name:
-slate::registration::slate_group_name:
-slate::registration::slate_org_name:
-slate::registration::slate_loc_lat:
-slate::registration::slate_loc_long:
-slate::security::disable_root_ssh: true
+slate::registration::client_token:
+slate::registration::cluster_name:
+slate::registration::group_name:
+slate::registration::org_name:
+slate::registration::cluster_location::
+slate::packages::package_list:
+  - htop
+  - strace
+  - tmux
+  - iftop
+  - screen
+  - vim
+  - sysstat
+  - jq
+  - curl
 slate::accounts::user_accounts:
   lincolnb:
     sshkeys:
