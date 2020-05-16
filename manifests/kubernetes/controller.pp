@@ -9,7 +9,7 @@ class slate::kubernetes::controller (
 ) {
   $node_name = fact('networking.fqdn')
 
-  $joined_to_cluster = fact('slate.kubernetes.cluster_host') != undef
+  $joined_to_cluster = fact('slate.kubernetes.kubelet_cluster_host') != undef
   $cluster_instantiating = $slate::kubernetes::role == 'initial_controller' and !$joined_to_cluster
 
   file { '/etc/kubernetes/default-audit-policy.yaml':

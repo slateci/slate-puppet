@@ -62,7 +62,7 @@ class slate::kubernetes (
   Boolean $schedule_on_controller,
   String $cgroup_driver = 'systemd',
 ) {
-  if fact('slate.kubernetes.cluster_host') != undef and
+  if fact('slate.kubernetes.kubelet_cluster_host') != undef and
     (fact('slate.kubernetes.kubelet_cluster_host') != $controller_hostname or
     fact('slate.kubernetes.kubelet_cluster_port') != $controller_port) {
       notify { 'cannot reregister node':

@@ -40,7 +40,7 @@ class slate (
     Class['slate::security']
     -> Class['slate::kubernetes']
 
-    $cluster_instantiating = $slate::kubernetes::role == 'initial_controller' and fact('slate.kubernetes.cluster_host') == undef
+    $cluster_instantiating = $slate::kubernetes::role == 'initial_controller' and fact('slate.kubernetes.kubelet_cluster_host') == undef
 
     if $register_with_slate and ($cluster_instantiating or fact('slate.kubernetes.leader')) {
       contain slate::registration

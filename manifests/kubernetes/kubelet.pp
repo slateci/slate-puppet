@@ -33,7 +33,7 @@ class slate::kubernetes::kubelet (
 
   # Update the kubelet config only if this node has been joined to a cluster.
   # Else kubelet will autodiscover our cgroupDriver in the kubeadm process.
-  if fact('slate.kubernetes.cluster_host') {
+  if fact('slate.kubernetes.kubelet_cluster_host') {
     file_line { 'kubelet-cgroup-config':
       ensure => present,
       path   => '/var/lib/kubelet/config.yaml',

@@ -4,7 +4,7 @@
 class slate::kubernetes::worker {
   $node_name = fact('networking.fqdn')
 
-  if fact('slate.kubernetes.cluster_host') == undef {
+  if fact('slate.kubernetes.kubelet_cluster_host') == undef {
     contain slate::kubernetes::kubeadm_join
   }
 }
