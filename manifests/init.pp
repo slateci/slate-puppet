@@ -45,12 +45,11 @@ class slate (
     if $register_with_slate and ($cluster_instantiating or fact('slate.kubernetes.leader')) {
       contain slate::registration
 
-      class { 'slate::registration':
-        require => [
-          Class['slate::packages'],
-          Class['slate::kubernetes'],
-        ]
-      }
+      Class['slate::packages']
+      -> Class['slate::registration']
+
+      Class['slate::kubernetes']
+      -> Class['slate::registration']
     }
   }
 
