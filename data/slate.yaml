@@ -3,7 +3,7 @@ slate::registration::client_token:
 slate::registration::cluster_name:
 slate::registration::group_name:
 slate::registration::org_name:
-slate::registration::cluster_location::
+slate::registration::cluster_location:
 slate::packages::package_list:
   - htop
   - strace
