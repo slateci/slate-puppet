@@ -8,11 +8,32 @@
 _Public Classes_
 
 * [`slate`](#slate): slate  Main class, includes all other classes.
-* [`slate::accounts`](#slateaccounts): This class creates SLATE administrator accounts.
-* [`slate::packages`](#slatepackages): This class handles installation of SLATE required packages.
+* [`slate::accounts`](#slateaccounts): This class creates SLATE administrator accounts and places them in the 'slateadm' group.
+Which is created if not present.
+* [`slate::cli`](#slatecli): This class handles installation of the SLATE CLI.
+* [`slate::kubernetes`](#slatekubernetes): This class handles the Kubernetes instantiation for specific nodes, then either instantiates a cluster or joins them to a cluster
+depending on what the node role is set to. The cluster will be spun up with Calico as the CNI and MetalLB as the load balancer.
+The cluster will also be instantiated as a high-availability cluster. Docker is used as the CRI. The installation process and joining
+process are handled by `kubeadm`. Joining new nodes is quite painless as the join tokens are, by default, distributed using PuppetDB,
+thus manual distribution of those secrets is not necessary.
+* [`slate::kubernetes::cluster_management::calico`](#slatekubernetescluster_managementcalico): This class handles installing and updating Calico.
+* [`slate::kubernetes::cluster_management::metallb`](#slatekubernetescluster_managementmetallb): This class handles installation and updates to MetalLB on the cluster.
+Updates to the MetalLB config will be applied to the cluster.
+* [`slate::kubernetes::controller`](#slatekubernetescontroller): This class handles joining clusters, instantiating clusters, and settings for controller nodes.
+* [`slate::kubernetes::kubeadm_init`](#slatekuberneteskubeadm_init): This class handles kubeadm init.
+* [`slate::kubernetes::kubeadm_join`](#slatekuberneteskubeadm_join): This class handles the `kubeadm join` process for both controllers and workers.
+If PuppetDB is used, the join tokens can be automatically discovered by nodes.
+* [`slate::kubernetes::kubelet`](#slatekuberneteskubelet): This class handles the configuration of kubelet on nodes.
+* [`slate::kubernetes::packages`](#slatekubernetespackages): This class handles installation of Docker and Kubernetes packages.
+* [`slate::kubernetes::pre`](#slatekubernetespre): This class handles pre-Kubernetes installation steps such as disabling swap,
+setting up kernel modules, etc.
+* [`slate::kubernetes::security`](#slatekubernetessecurity): This class handles setting security settings for Kubernetes, such as firewall settings and selinux modes.
+* [`slate::kubernetes::worker`](#slatekubernetesworker): This class handles managing worker nodes in the Kubernetes cluster.
+* [`slate::packages`](#slatepackages): This class handles installation of SLATE required packages and the SLATE CLI.
 * [`slate::registration`](#slateregistration): This class handles SLATE cluster federation registration.
-* [`slate::security`](#slatesecurity): This class handles setting (and disabling) security settings for SLATE, such as
-the firewall, selinux, and ssh login settings.
+* [`slate::security`](#slatesecurity): This class handles setting specific security settings required per node for SLATE.
+This module will manage some firewall rules through iptables (ergo disabling firewalld).
+This module will also disable root login through SSH.
 * [`slate::tuning`](#slatetuning): This class handles tuning of sysctl parameters for SLATE.
 
 _Private Classes_
@@ -21,12 +42,12 @@ _Private Classes_
 * `slate::dell::keys`: This class handles installation of Dell's public keys.
 * `slate::dell::racadm`: This class handles installation of RACADM.
 * `slate::dell::repo`: This class handles installation of Dell's DSU repository.
-* `slate::kubeadm::packages`: This class handles installation of Docker and Kubernetes as a single-node cluster.
-* `slate::kubeadm::post`: This class handles kubeadm commands post Kubernetes installation, such as
-cni network provider, scheduling on controller, etc.
-* `slate::kubeadm::pre`: This class handles pre-Kubernetes installation steps such as disabling swap,
-setting up kernel modules, etc.
-* `slate::kubeadm::run_init`: This class handles kubeadm init.
+* `slate::firewall::post`: This class handles setting post global firewall rules as per
+https://github.com/puppetlabs/puppetlabs-firewall#create-the-my_fwpre-and-my_fwpost-classes
+* `slate::firewall::pre`: This class handles setting pre global firewall rules as per
+https://github.com/puppetlabs/puppetlabs-firewall#create-the-my_fwpre-and-my_fwpost-classes
+* `slate::kubernetes::cluster_management::token_cleanup`: This class handles cleanup of kubeadm tokens.
+This is necessary as our token facts generates new tokens quite frequently.
 
 **Functions**
 
@@ -44,34 +65,44 @@ Main class, includes all other classes.
 
 The following parameters are available in the `slate` class.
 
-##### `create_slate_admin_accounts`
+##### `manage_kubernetes`
 
 Data type: `Boolean`
 
-Includes slate::accounts class to create SLATE administrator accounts.
+Includes the slate::kubernetes class to setup Kubernetes on this node.
+apply_security_policy must be set to true if this is set to true.
 
 Default value: `true`
 
-##### `single_node_cluster`
+##### `register_with_slate`
 
 Data type: `Boolean`
 
-Installs and configures Kubernetes as a single-node cluster. Do not enable
-if you setup Kubernetes yourself or use puppetlabs-kubernetes.
+Install the SLATE CLI and register this cluster with SLATE.
 
 Default value: `true`
 
-##### `slate_tmp_dir`
+##### `apply_security_policy`
 
-Data type: `String`
+Data type: `Boolean`
 
-The directory to hold temporary SLATE files.
+Applies the SLATE provided security policy. This will disable firewalld in favor of iptables.
+This is required for manage_kubernetes.
 
-Default value: '/tmp/slate'
+Default value: `true`
+
+##### `manage_slate_admin_accounts`
+
+Data type: `Boolean`
+
+Includes the slate::accounts class to manage SLATE administrator accounts.
+
+Default value: `true`
 
 ### slate::accounts
 
-This class creates SLATE administrator accounts.
+This class creates SLATE administrator accounts and places them in the 'slateadm' group.
+Which is created if not present.
 
 * **See also**
 https://forge.puppet.com/puppetlabs/accounts
@@ -93,19 +124,422 @@ Data type: `Accounts::User::Resource`
 An Accounts::User::Resource containing the default settings
 to apply to created accounts.
 
-##### `passwordless_sudo_on_wheel`
+##### `passwordless_sudo`
 
 Data type: `Boolean`
 
-If true, users in group 'wheel' will have NOPASSWD sudo access.
+If true, users in the 'slateadm' group will have 'NOPASSWD: ALL' sudo privileges.
+This enables inclusion of /etc/sudoers.d to /etc/sudoers.
+
+### slate::cli
+
+This class handles installation of the SLATE CLI.
+
+#### Parameters
+
+The following parameters are available in the `slate::cli` class.
+
+##### `endpoint_url`
+
+Data type: `String`
+
+The endpoint to use for the SLATE CLI.
+
+Default value: 'https://api.slateci.io:18080'
+
+### slate::kubernetes
+
+This class handles the Kubernetes instantiation for specific nodes, then either instantiates a cluster or joins them to a cluster
+depending on what the node role is set to. The cluster will be spun up with Calico as the CNI and MetalLB as the load balancer.
+The cluster will also be instantiated as a high-availability cluster. Docker is used as the CRI. The installation process and joining
+process are handled by `kubeadm`. Joining new nodes is quite painless as the join tokens are, by default, distributed using PuppetDB,
+thus manual distribution of those secrets is not necessary.
+
+* **Note** This module can manage existing Kubernetes cluster non-destructively, i.e. you can use this module to join new nodes to an
+existing cluster that was not instantiated with this module. However, if the cluster was originally setup as a single-availability
+cluster, you cannot add additional controller nodes to the cluster but can add additional worker nodes.
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes` class.
+
+##### `role`
+
+Data type: `Enum[
+    'initial_controller',
+    'controller',
+    'worker'
+  ]`
+
+If set to initial_controller and the node is not currently joined in a cluster, instantiate a new cluster.
+If set to controller, join this node to the specified cluster as a controller node.
+If set to worker, join this node to the specified cluster as a worker node.
+
+##### `docker_version`
+
+Data type: `String`
+
+The version of Docker to use.
+
+##### `kubernetes_version`
+
+Data type: `String`
+
+The version of `kubectl`, `kubeadm`, and `kubelet` to install.
+Note, changing this after cluster instantiation/joining without following the "kubeadm-upgrade" instructions will result in undefined
+behavior. This value should _be the same for all nodes in a given cluster_, unless you are in the middle of upgrading a cluster.
+
+##### `controller_hostname`
+
+Data type: `String`
+
+The hostname the cluster should listen on.
+For clusters intended to be high-availability, this should be the hostname of a load balancer, NOT a controller node. See
+https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/high-availability/#create-load-balancer-for-kube-apiserver.
+For clusters intended to be single-availability, you can set this to the hostname of the single controller node.
+
+##### `controller_port`
+
+Data type: `Integer[1, 65565]`
+
+The port the cluster should listen on.
+Similarly to `controller_hostname`, this should be the port of the load balancer if the cluster is intended to be a high-availability
+cluster. If it is intended to be a single-availability cluster, you can set this to the port of the single controller node.
+
+Default value: 6443
+
+##### `schedule_on_controller`
+
+Data type: `Boolean`
+
+If true and role is set to 'initial_controller' or 'controller', this node will be untainted to allow for Pods to be scheduled on
+this node.
+If false and role is set to 'initial_controller' or 'controller', this node will be tainted to prevent Pods from being scheduled on it.
+Note, this is specific to individual controller nodes.
+
+Default value: `true`
+
+##### `cgroup_driver`
+
+Data type: `String`
+
+The cgroup_driver to use with Docker. The kubelet config is changed to reflect this cgroup_driver.
+
+Default value: 'systemd'
+
+### slate::kubernetes::cluster_management::calico
+
+This class handles installing and updating Calico.
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes::cluster_management::calico` class.
+
+##### `manifest_url`
+
+Data type: `String`
+
+URL for the Calico manifest.
+
+### slate::kubernetes::cluster_management::metallb
+
+This class handles installation and updates to MetalLB on the cluster.
+Updates to the MetalLB config will be applied to the cluster.
+
+* **Note** Only MetalLB version v0.9.X is currently supported by this module.
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes::cluster_management::metallb` class.
+
+##### `namespace_url`
+
+Data type: `String`
+
+The URL that contains the YAML config to setup the MetalLB namespace.
+
+##### `manifest_url`
+
+Data type: `String`
+
+The URL that contains the YAML config to setup MetalLB itself.
+
+##### `config`
+
+Data type: `Hash`
+
+The hash of the configuration to apply. This hash follows the "config: |" line in
+https://metallb.universe.tf/configuration/
+See data/common.yaml for an example.
+
+### slate::kubernetes::controller
+
+This class handles joining clusters, instantiating clusters, and settings for controller nodes.
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes::controller` class.
+
+##### `schedule_on_controller`
+
+Data type: `Any`
+
+See $slate::kubernetes::schedule_on_controller.
+
+Default value: $slate::kubernetes::schedule_on_controller
+
+### slate::kubernetes::kubeadm_init
+
+This class handles kubeadm init.
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes::kubeadm_init` class.
+
+##### `config`
+
+Data type: `Hash[Enum[
+    'InitConfiguration',
+    'ClusterConfiguration',
+    'KubeProxyConfiguration',
+    'KubeletConfiguration',
+    ], Hash]`
+
+A hash where each key maps to a YAML-compatible hash to be passed to kubeadm init as a config file.
+See data/common.yaml for an example.
+See https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#hdr-Kubeadm_init_configuration_types
+for all configuration settings. _Do not_ supply InitConfiguration:nodeRegistration:name or
+ClusterConfiguration:controlPlaneEndpoint as these will be overridden by other paramters.
+
+Default value: {}
+
+##### `controller_hostname`
+
+Data type: `Any`
+
+See $slate::kubernetes::controller_hostname.
+
+Default value: $slate::kubernetes::controller_hostname
+
+##### `controller_port`
+
+Data type: `Any`
+
+See $slate::kubernetes::controller_port.
+
+Default value: $slate::kubernetes::controller_port
+
+### slate::kubernetes::kubeadm_join
+
+This class handles the `kubeadm join` process for both controllers and workers.
+If PuppetDB is used, the join tokens can be automatically discovered by nodes.
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes::kubeadm_join` class.
+
+##### `config`
+
+Data type: `Hash[Enum['JoinConfiguration'], Hash]`
+
+A hash where each key maps to a YAML-compatible hash to be passed to kubeadm join as a config file.
+See data/common.yaml for an example.
+See https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#hdr-Kubeadm_join_configuration_types
+for all configuration settings. _Do not_ supply JoinConfiguration:nodeRegistration:name,
+JoinConfiguration:discovery:bootstrapToken, or JoinConfiguration:controlPlane:certificateKey as these will be overridden
+by other parameters.
+
+Default value: {}
+
+##### `use_puppetdb`
+
+Data type: `Boolean`
+
+If true, automatically discover join tokens through PuppetDB. PuppetDB must be enabled on the Puppet Master.
+If false, the `join_token` parameter will be used.
+
+Default value: `true`
+
+##### `join_token`
+
+Data type: `Optional[Struct[{
+    certificate_key => Optional[String],
+    discovery_token => String,
+    discovery_ca_cert_hash => String,
+  }]]`
+
+The tokens to be used in the `kubeadm join` process. If `use_puppetdb` is false, this parameter must be specified.
+`certificate_key` is only required for controller nodes.
+
+##### `role`
+
+Data type: `Any`
+
+See $slate::kubernetes::role.
+
+Default value: $slate::kubernetes::role
+
+##### `controller_hostname`
+
+Data type: `Any`
+
+See $slate::kubernetes::controller_hostname.
+
+Default value: $slate::kubernetes::controller_hostname
+
+##### `controller_port`
+
+Data type: `Any`
+
+See $slate::kubernetes::controller_port.
+
+Default value: $slate::kubernetes::controller_port
+
+### slate::kubernetes::kubelet
+
+This class handles the configuration of kubelet on nodes.
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes::kubelet` class.
+
+##### `cgroup_driver`
+
+Data type: `String`
+
+See slate::kubernetes::cgroup_driver.
+
+Default value: $slate::kubernetes::cgroup_driver
+
+### slate::kubernetes::packages
+
+This class handles installation of Docker and Kubernetes packages.
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes::packages` class.
+
+##### `install_kubectl`
+
+Data type: `Boolean`
+
+If true installs kubectl. By default, this is only true on controller nodes.
+
+Default value: =~
+
+##### `kubernetes_version`
+
+Data type: `String`
+
+See slate::kubernetes::kubernetes_version.
+
+Default value: $slate::kubernetes::kubernetes_version
+
+##### `docker_version`
+
+Data type: `String`
+
+See slate::kubernetes::docker_version.
+
+Default value: $slate::kubernetes::docker_version
+
+##### `docker_cgroup_driver`
+
+Data type: `String`
+
+See slate::kubernetes::cgroup_driver.
+
+Default value: $slate::kubernetes::cgroup_driver
+
+### slate::kubernetes::pre
+
+This class handles pre-Kubernetes installation steps such as disabling swap,
+setting up kernel modules, etc.
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes::pre` class.
+
+##### `k8s_sysctl_path`
+
+Data type: `String`
+
+The path to store k8s sysctl parameters.
+
+Default value: '/etc/sysctl.d/k8s.conf'
+
+### slate::kubernetes::security
+
+This class handles setting security settings for Kubernetes, such as firewall settings and selinux modes.
+
+* **Note** The firewall module will order rules starting with '000' to '899' before unmanaged rules.
+Rules starting with '900' to '999' will be placed after unmanaged rules. This allows Calico's Fenix and
+kube-proxy to manage their own rules independently of this module.
+
+* **See also**
+https://github.com/puppetlabs/puppetlabs-firewall
+
+#### Parameters
+
+The following parameters are available in the `slate::kubernetes::security` class.
+
+##### `controller_ports`
+
+Data type: `Array[String]`
+
+List of TCP ports to open for a controller node.
+
+##### `general_ports`
+
+Data type: `Array[String]`
+
+List of TCP ports to open for all k8s nodes.
+
+##### `calico_ports`
+
+Data type: `Array[String]`
+
+List of TCP ports to open for Calico on all k8s nodes.
+
+##### `nodeport_services`
+
+Data type: `Array[String]`
+
+List of TCP ports to open for NodePort Services for any node with scheduling enabled.
+
+##### `role`
+
+Data type: `Any`
+
+See $slate::kubernetes::role
+
+Default value: $slate::kubernetes::role
+
+##### `schedule_on_controller`
+
+Data type: `Any`
+
+See $slate::kubernetes::schedule_on_controller
+
+Default value: $slate::kubernetes::schedule_on_controller
+
+### slate::kubernetes::worker
+
+This class handles managing worker nodes in the Kubernetes cluster.
 
 ### slate::packages
 
-This class handles installation of SLATE required packages.
+This class handles installation of SLATE required packages and the SLATE CLI.
 
 #### Parameters
 
 The following parameters are available in the `slate::packages` class.
+
+##### `package_list`
+
+Data type: `Array`
+
+The list of package names to install.
 
 ##### `install_dell_tools`
 
@@ -115,64 +549,46 @@ Installs RACADM and dsu if the manufacturer is 'Dell Inc.'
 
 Default value: `true`
 
-##### `package_list`
-
-Data type: `Array`
-
-The list of package names to install.
-
-Default value: ['htop', 'strace', 'tmux', 'iftop', 'screen', 'sysstat', 'jq', 'curl']
-
-##### `slate_tmp_dir`
-
-Data type: `String`
-
-The directory to unpack the SLATE CLI into.
-
-Default value: $slate::slate_tmp_dir
-
 ### slate::registration
 
 This class handles SLATE cluster federation registration.
 
-* **Note** This class requires the SLATE CLI to have been installed and present in
-either '/usr', '/usr/bin', '/sbin', '/usr/local/bin'
+* **Note** This class requires /etc/kubernetes/admin.conf to be present.
 
 #### Parameters
 
 The following parameters are available in the `slate::registration` class.
 
-##### `slate_client_token`
+##### `client_token`
 
 Data type: `String`
 
 The client token obtained for your user from the SLATE portal.
 
-##### `slate_cluster_name`
+##### `cluster_name`
 
 Data type: `String`
 
 The name to register your cluster as.
 
-##### `slate_group_name`
+##### `group_name`
 
 Data type: `String`
 
 The group name to register your cluster under.
 
-##### `slate_org_name`
+##### `org_name`
 
 Data type: `String`
 
 The organization name to register your cluster under.
 
-##### `slate_endpoint_url`
+##### `cluster_location`
 
-Data type: `String`
+Data type: `Optional[String]`
 
-The API endpoint for the SLATE CLI.
-
-Default value: 'https://api.slateci.io:18080'
+The location of your cluster, the string should be of the form "[LATTITUDE],[LONGITUDE]".
+Due to SLATE CLI limitations, this is not fully declarative and is only run on the initial SLATE cluster registration.
 
 ##### `ingress_enabled`
 
@@ -183,40 +599,33 @@ on your Kubernetes cluster (e.g. MetalLB).
 
 Default value: `true`
 
-##### `slate_loc_lat`
-
-Data type: `Optional[String]`
-
-The latitude of your SLATE cluster location. Due to SLATE CLI limitations,
-this is not fully declarative and is only run on the initial SLATE cluster registration.
-
-##### `slate_loc_long`
-
-Data type: `Optional[String]`
-
-The longitude of your SLATE cluster location. Due to SLATE CLI limitations,
-this is not fully declarative and is only run on the initial SLATE cluster registration.
-
 ### slate::security
 
-This class handles setting (and disabling) security settings for SLATE, such as
-the firewall, selinux, and ssh login settings.
+This class handles setting specific security settings required per node for SLATE.
+This module will manage some firewall rules through iptables (ergo disabling firewalld).
+This module will also disable root login through SSH.
 
-#### Parameters
+* **Note** The firewall module will order rules starting with '000' to '899' before unmanaged rules.
+Rules starting with '900' to '999' will be placed after unmanaged rules.
 
-The following parameters are available in the `slate::security` class.
-
-##### `disable_root_ssh`
-
-Data type: `Boolean`
-
-Ensures 'PermitRootLogin no' is set in `/etc/ssh/sshd_config`.
-
-Default value: `true`
+* **See also**
+https://github.com/puppetlabs/puppetlabs-firewall
 
 ### slate::tuning
 
 This class handles tuning of sysctl parameters for SLATE.
+
+#### Parameters
+
+The following parameters are available in the `slate::tuning` class.
+
+##### `tuning_sysctl_path`
+
+Data type: `String`
+
+Path to store tuning sysctl parameters.
+
+Default value: '/etc/sysctl.d/fasterdata.conf'
 
 ## Functions
 
