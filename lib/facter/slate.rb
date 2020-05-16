@@ -83,6 +83,7 @@ Facter.add(:slate) do
     res['kubernetes']['leader'] = true
   end
 
+  # We can't keep track of which certificate keys are still valid, so we generate a new one each time.
   certificate_key = Facter::Core::Execution.execute("#{kubeadm} init phase upload-certs --upload-certs 2>/dev/null | egrep '^\\w{64}$'")
 
   # Source: https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#join-nodes
