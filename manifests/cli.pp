@@ -20,7 +20,7 @@ class slate::cli (
     ensure => directory,
   }
   -> file { '/root/.slate/endpoint':
-    content => $slate_endpoint_url,
+    content => $endpoint_url,
     mode    => '0600',
   }
 
