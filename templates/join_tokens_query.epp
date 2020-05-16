@@ -1,0 +1,18 @@
+inventory[facts.slate.kubernetes]{
+    facts.slate.kubernetes is not null
+        and facts.slate.kubernetes.leader != false
+        and (
+                (
+                 facts.slate.kubernetes.apiserver_advertise_hostname is not null
+                 and facts.slate.kubernetes.apiserver_advertise_hostname = '<%= $hostname %>'
+                 and facts.slate.kubernetes.apiserver_advertise_port = <%= $port %>
+                )
+                or
+                (
+                 facts.slate.kubernetes.control_plane_endpoint_hostname is not null
+                 and facts.slate.kubernetes.control_plane_endpoint_hostname = '<%= $hostname %>'
+                 and facts.slate.kubernetes.control_plane_endpoint_port = <%= $port %>
+                )
+            )
+        order by timestamp asc
+}

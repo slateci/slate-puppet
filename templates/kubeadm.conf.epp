@@ -1,0 +1,5 @@
+<%- $config.each |$key, $value| { -%>
+<%= to_yaml($value) -%>
+apiVersion: kubeadm.k8s.io/v1beta2
+kind: <%= $key %>
+<% } -%>
