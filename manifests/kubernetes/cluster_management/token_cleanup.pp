@@ -4,15 +4,15 @@
 #
 # @api private
 #
-class slate::kubernetes::cluster_cleanup {
-  exec { 'cleanup old tokens':
+class slate::kubernetes::cluster_management::token_cleanup {
+  exec { 'cleanup invalid tokens':
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
     command     => @(EOF/L)
       set -euo pipefail;
       kubeadm token list
       | tail -n +2
-      | awk -v date=$(date +%FT%T%:z --date="-7 days") '{if($2 == "<invalid>" && $3 < date) print $1;}'
+      | awk '{if($2 == "<invalid>") print $1;}'
       | xargs -n1 kubeadm token delete
       | - EOF
       ,
@@ -21,7 +21,7 @@ class slate::kubernetes::cluster_cleanup {
       test $(
       kubeadm token list
       | tail -n +2
-      | awk -v date=$(date +%FT%T%:z --date="-7 days") '{if($2 == "<invalid>" && $3 < date) print $1;}'
+      | awk '{if($2 == "<invalid>") print $1;}'
       | wc -l
       ) -ge 1
       | - EOF
