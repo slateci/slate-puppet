@@ -58,8 +58,8 @@ class slate::kubernetes (
   String $docker_version,
   String $kubernetes_version,
   String $controller_hostname,
-  Integer[1, 65565] $controller_port = 6443,
-  Boolean $schedule_on_controller = true,
+  Integer[1, 65565] $controller_port,
+  Boolean $schedule_on_controller,
   String $cgroup_driver = 'systemd',
 ) {
   if fact('slate.kubernetes.cluster_host') != undef and
