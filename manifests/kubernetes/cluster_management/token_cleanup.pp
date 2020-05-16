@@ -9,18 +9,18 @@ class slate::kubernetes::cluster_management::token_cleanup {
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
     command     => @(EOF/L)
-      kubeadm token list
-      | tail -n +2
-      | awk '{if($2 == "<invalid>") print $1;}'
-      | xargs -n1 kubeadm token delete
+      kubeadm token list \
+      | tail -n +2 \
+      | awk '{if($2 == "<invalid>") print $1;}' \
+      | xargs -n1 kubeadm token delete \
       | - EOF
       ,
     onlyif      => @(EOF/L)
-      test $(
-      kubeadm token list
-      | tail -n +2
-      | awk '{if($2 == "<invalid>") print $1;}'
-      | wc -l
+      test $(\
+      kubeadm token list \
+      | tail -n +2 \
+      | awk '{if($2 == "<invalid>") print $1;}' \
+      | wc -l\
       ) -ge 1
       | - EOF
       ,

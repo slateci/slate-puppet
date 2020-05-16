@@ -66,11 +66,11 @@ class slate::kubernetes (
     (fact('slate.kubernetes.kubelet_cluster_host') != $controller_hostname or
     fact('slate.kubernetes.kubelet_cluster_port') != $controller_port) {
       notify { 'cannot reregister node':
-        message => @(EOF)
-        This node is already registered with
-        ${fact('slate.kubernetes.kubelet_cluster_host')}:${fact('slate.kubernetes.kubelet_cluster_port')},
+        message => @("EOF"/L)
+        This node is already registered with \
+        ${fact('slate.kubernetes.kubelet_cluster_host')}:${fact('slate.kubernetes.kubelet_cluster_port')}, \
         cannot register with ${controller_hostname}:${controller_port}!
-        | - EOF
+        | EOF
       }
   }
 

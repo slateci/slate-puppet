@@ -15,8 +15,7 @@ class slate::tuning (
     owner   => 'root',
     group   => 'root',
     mode    => '0644',
-    content => @(EOF/L)
-    # allow testing with buffers up to 64MB
+    content => @(EOF)
     net.core.rmem_max = 67108864
     net.core.wmem_max = 67108864
     net.ipv4.tcp_rmem = 4096 87380 33554432
@@ -24,7 +23,7 @@ class slate::tuning (
     net.ipv4.tcp_congestion_control=htcp
     net.ipv4.tcp_mtu_probing=1
     net.core.default_qdisc = fq
-    | - EOF
+    | EOF
   }
 
   ~> exec { "refresh sysctl ${tuning_sysctl_path}":

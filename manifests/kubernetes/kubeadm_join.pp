@@ -45,11 +45,11 @@ class slate::kubernetes::kubeadm_join (
 
     if length($join_tokens) == 0 {
       fail(
-        @(EOF)
-        Join tokens not found for ${controller_hostname}:${controller_port}.
-        The controller may not have published join tokens yet, if so, you will have to wait for the controller to make another Puppet run
+        @("EOF"/L)
+        Join tokens not found for ${controller_hostname}:${controller_port}. \
+        The controller may not have published join tokens yet, if so, you will have to wait for the controller to make another Puppet run \
         before join tokens are available.
-        | -EOF
+        | EOF
       )
     }
 
@@ -80,10 +80,10 @@ class slate::kubernetes::kubeadm_join (
   if $role == 'controller' {
     if $use_puppetdb and $join_token['control_plane_endpoint_hostname'] == undef {
       fail(
-        @(EOF)
-        The cluster at ${controller_hostname}:${controller_port} was setup as a single-availability cluster
+        @("EOF"/L)
+        The cluster at ${controller_hostname}:${controller_port} was setup as a single-availability cluster \
         and does not support adding new controller nodes.
-        | -EOF
+        | EOF
       )
     }
 
@@ -100,11 +100,11 @@ class slate::kubernetes::kubeadm_join (
     })
 
     notify { 'kubeadm join warning':
-      message => @(EOF)
-        All join tokens were found. Please be aware `kubeadm join` could fail as it is possible to be served a stale certificate key.
-        This is a transient error and should not be present in the next run. If this is a consistent failure, further investigation
+      message => @(EOF/L)
+        All join tokens were found. Please be aware `kubeadm join` could fail as it is possible to be served a stale certificate key. \
+        This is a transient error and should not be present in the next run. If this is a consistent failure, further investigation \
         is necessary.
-        | -EOF
+        | EOF
     }
   }
   elsif $role == 'worker' {
