@@ -9,7 +9,6 @@ class slate::kubernetes::cluster_management::token_cleanup {
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
     command     => @(EOF/L)
-      set -euo pipefail;
       kubeadm token list
       | tail -n +2
       | awk '{if($2 == "<invalid>") print $1;}'
@@ -17,7 +16,6 @@ class slate::kubernetes::cluster_management::token_cleanup {
       | - EOF
       ,
     onlyif      => @(EOF/L)
-      set -euo pipefail;
       test $(
       kubeadm token list
       | tail -n +2
