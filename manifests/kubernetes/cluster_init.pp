@@ -1,35 +1,50 @@
 # @summary
 #   This class handles kubeadm init.
 #
-# @api private
+# @param kubeadm_init_config
+#   A hash where each key maps to a YAML-compatible hash to be passed to kubeadm init as a config file.
+#   See data/common.yaml for an example.
+#   See https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#hdr-Kubeadm_init_configuration_types
+#   for all configuration settings. _Do not_ supply InitConfiguration:nodeRegistration:name or
+#   ClusterConfiguration:controlPlaneEndpoint as these will be overridden by other paramters.
+# @param controller_hostname
+#   See $slate::kubernetes::controller_hostname.
+# @param controller_port
+#   See $slate::kubernetes::controller_port.
 #
 class slate::kubernetes::cluster_init (
-  String $controller_hostname = $slate::kubernetes::controller_hostname,
-  Integer[1, 65565] $controller_port = $slate::kubernetes::controller_port,
-  Hash[Pattern[/\A[a-z_]+/], Variant[String, Boolean]] $kubeadm_init_flags = $slate::kubernetes::kubeadm_init_flags,
-  String $cni_network_provider_url = $slate::kubernetes::cni_network_provider_url,
+  Hash[Enum[
+    'InitConfiguration',
+    'ClusterConfiguration',
+    'KubeProxyConfiguration',
+    'KubeletConfiguration',
+    ], Hash] $kubeadm_init_config = {},
+  $controller_hostname = $slate::kubernetes::controller_hostname,
+  $controller_port = $slate::kubernetes::controller_port,
 ) {
-  $node_name = fact('networking.fqdn')
+  $base_config = {
+    'InitConfiguration' => {
+      'nodeRegistration' => {
+        'name' => fact('networking.fqdn')
+      }
+    },
+    'ClusterConfiguration' => {
+      'controlPlaneEndpoint' => "${controller_hostname}:${controller_port}"
+    }
+  }
 
-  $init_flags = kubeadm_init_flags({
-    node_name => $node_name,
-    control_plane_endpoint => "${controller_hostname}:${controller_port}",
-    upload_certs => true,
-  } + $kubeadm_init_flags)
-
-  exec { 'kubeadm init':
-    command     => "kubeadm init ${init_flags}",
+  file { '/etc/kubernetes/kubeadm-init.conf':
+    ensure  => present,
+    owner   => 'root',
+    group   => 'root',
+    mode    => '0600',
+    content => epp('slate/kubeadm.conf.epp', { 'config' => deep_merge($kubeadm_init_config, $base_config) })
+  }
+  -> exec { 'kubeadm init':
+    command     => 'kubeadm init --config /etc/kubernetes/kubeadm-init.conf',
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     logoutput   => true,
     timeout     => 0,
-    unless      => "kubectl get nodes | grep ${node_name}",
-  }
-
-  -> exec { 'Install cni network provider':
-    command     => "kubectl apply -f ${shell_escape($cni_network_provider_url)}",
-    path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-    unless      => "kubectl -n kube-system get daemonset | egrep '(flannel|weave|calico-node|cilium)'",
-    environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
   }
 }
