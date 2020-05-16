@@ -4,9 +4,6 @@ metadata:
   namespace: metallb-system
   name: config
 data:
-  config: |
-    address-pools:
-    - name: default
-      protocol: layer2
-      addresses:
-      - <%= $start_ip_range %>-<%= $end_ip_range %>
+  config: |<%- $config.split("\n")[1,-1].each | $line | { %>
+    <%= $line -%>
+    <% } -%>

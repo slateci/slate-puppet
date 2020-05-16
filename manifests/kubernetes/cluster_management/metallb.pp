@@ -1,5 +1,5 @@
 # @summary
-#   This class handles installation and updates to MetalLB on the cluster..
+#   This class handles installation and updates to MetalLB on the cluster.
 #   Updates to the MetalLB config will be applied to the cluster.
 #
 # @note Only MetalLB version v0.9.X is currently supported by this module.
@@ -8,20 +8,18 @@
 #   The URL that contains the YAML config to setup the MetalLB namespace.
 # @param manifest_url
 #   The URL that contains the YAML config to setup MetalLB itself.
-# @param start_ip_range
-#   The starting IP to use for MetalLB load balancing.
-# @param end_ip_range
-#   The ending IP to use for MetalLB load balancing.
+# @param config
+#   The hash of the configuration to apply. This hash follows the "config: |" line in
+#   https://metallb.universe.tf/configuration/
+#   See data/common.yaml for an example.
 #
-class slate::kubernetes::metallb (
+class slate::kubernetes::cluster_management::metallb (
   String $namespace_url,
   String $manifest_url,
-  String $start_ip_range,
-  String $end_ip_range,
+  Hash $config,
 ) {
   $metallb_config = epp('slate/metallb-config.yaml.epp', {
-      'start_ip_range' => $start_ip_range,
-      'end_ip_range' => $end_ip_range,
+      'config' => to_yaml($config),
     }
   )
 
@@ -44,7 +42,7 @@ class slate::kubernetes::metallb (
     command     => 'kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"',
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
-    unless      => 'test "$(kubectl get secrets -n metallb-system 2>&1)" != "No resources found."',
+    onlyif      => 'test "$(kubectl get secrets -n metallb-system 2>&1)" = "No resources found."',
   }
 
   -> exec { 'apply metallb config':
