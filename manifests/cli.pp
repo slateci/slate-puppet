@@ -7,14 +7,7 @@
 class slate::cli (
   String $endpoint_url = 'https://api.slateci.io:18080',
 ) {
-  ensure_resources('package', {
-    'jq' => {
-      ensure => latest,
-    },
-    'curl' => {
-      ensure => latest,
-    }
-  })
+  ensure_packages(['jq', 'curl'], { ensure => latest })
 
   file { '/root/.slate':
     ensure => directory,

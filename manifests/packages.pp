@@ -12,9 +12,7 @@ class slate::packages (
 ) {
   contain slate::cli
 
-  package { $package_list:
-    ensure => latest,
-  }
+  ensure_packages($package_list, { ensure => latest })
 
   if $install_dell_tools and $facts['manufacturer'] == 'Dell Inc.' {
     contain slate::dell::racadm
