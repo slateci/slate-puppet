@@ -1,0 +1,63 @@
+---
+# Per node settings
+slate::kubernetes::docker_version: '19.03.8'
+slate::kubernetes::kubernetes_version: '1.18.2'
+slate::kubernetes::role:
+slate::kubernetes::controller_hostname:
+slate::kubernetes::controller_port: 6443
+slate::kubernetes::schedule_on_controller: true
+slate::kubernetes::security::controller_ports:
+# kube-apiserver
+- 6443
+# etcd
+- 2379-2380
+# kube-scheduler, kube-controller-manager
+- 10251-10252
+slate::kubernetes::security::general_ports:
+# kubelet
+- 10250
+slate::kubernetes::security::calico_ports:
+# bgp
+- 179
+slate::kubernetes::security::nodeport_services:
+- 30000-32767
+slate::kubernetes::kubeadm_join::use_puppetdb: true
+slate::kubernetes::kubeadm_join::join_token:
+#  certificateKey:
+#  discovery_token:
+#  discovery_ca_cert_hash:
+slate::kubernetes::kubeadm_join::config:
+  JoinConfiguration:
+    nodeRegistration:
+      taints: null
+# Cluster settings
+slate::kubernetes::kubeadm_init::config:
+  ClusterConfiguration:
+    networking:
+      dnsDomain: cluster.local
+      podSubnet: 192.168.0.0/16
+      serviceSubnet: 10.96.0.0/12
+    extraArgs:
+      audit-policy-file: "/etc/kubernetes/default-audit-policy.yaml"
+      audit-log-path: "/etc/kubernetes/audit/kube-apiserver-audit.log"
+      audit-log-maxage: "2"
+    extraVolumes:
+    - name: "audit-policy"
+      hostPath: "/etc/kubernetes/default-audit-policy.yaml"
+      mountPath: "/etc/kubernetes/default-audit-policy.yaml"
+      readOnly: false
+      pathType: File
+    - name: "audit-volume"
+      hostPath: "/var/log/kubernetes/audit"
+      mountPath: "/etc/kubernetes/audit"
+      readOnly: false
+      pathType: DirectoryOrCreate
+slate::kubernetes::cluster_management::metallb::namespace_url: 'https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml'
+slate::kubernetes::cluster_management::metallb::manifest_url: 'https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml'
+slate::kubernetes::cluster_management::metallb::config:
+#  address-pools:
+#  - name: default
+#    protocol: layer2
+#    addresses:
+#    - "START_IP-END_IP"
+slate::kubernetes::cluster_management::calico::manifest_url: 'https://docs.projectcalico.org/v3.14/manifests/calico.yaml'

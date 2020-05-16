@@ -1,7 +1,7 @@
 # @summary
 #   This class handles kubeadm init.
 #
-# @param kubeadm_init_config
+# @param config
 #   A hash where each key maps to a YAML-compatible hash to be passed to kubeadm init as a config file.
 #   See data/common.yaml for an example.
 #   See https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#hdr-Kubeadm_init_configuration_types
@@ -12,13 +12,13 @@
 # @param controller_port
 #   See $slate::kubernetes::controller_port.
 #
-class slate::kubernetes::cluster_init (
+class slate::kubernetes::kubeadm_init (
   Hash[Enum[
     'InitConfiguration',
     'ClusterConfiguration',
     'KubeProxyConfiguration',
     'KubeletConfiguration',
-    ], Hash] $kubeadm_init_config = {},
+    ], Hash] $config = {},
   $controller_hostname = $slate::kubernetes::controller_hostname,
   $controller_port = $slate::kubernetes::controller_port,
 ) {
@@ -38,7 +38,7 @@ class slate::kubernetes::cluster_init (
     owner   => 'root',
     group   => 'root',
     mode    => '0600',
-    content => epp('slate/kubeadm.conf.epp', { 'config' => deep_merge($kubeadm_init_config, $base_config) })
+    content => epp('slate/kubeadm.conf.epp', { 'config' => deep_merge($config, $base_config) })
   }
   -> exec { 'kubeadm init':
     command     => 'kubeadm init --config /etc/kubernetes/kubeadm-init.conf',

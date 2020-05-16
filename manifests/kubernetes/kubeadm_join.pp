@@ -2,7 +2,7 @@
 #   This class handles the `kubeadm join` process for both controllers and workers.
 #   If PuppetDB is used, the join tokens can be automatically discovered by nodes.
 #
-# @param kubeadm_join_config
+# @param config
 #   A hash where each key maps to a YAML-compatible hash to be passed to kubeadm join as a config file.
 #   See data/common.yaml for an example.
 #   See https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#hdr-Kubeadm_join_configuration_types
@@ -23,7 +23,7 @@
 #   See $slate::kubernetes::controller_port.
 #
 class slate::kubernetes::kubeadm_join (
-  Hash[Enum['JoinConfiguration'], Hash] $kubeadm_join_config = {},
+  Hash[Enum['JoinConfiguration'], Hash] $config = {},
   Boolean $use_puppetdb = true,
   Optional[Struct[{
     certificate_key => Optional[String],
@@ -116,7 +116,7 @@ class slate::kubernetes::kubeadm_join (
     owner   => 'root',
     group   => 'root',
     mode    => '0600',
-    content => epp('slate/kubeadm.conf.epp', { 'config' => deep_merge($kubeadm_join_config, $base_config) })
+    content => epp('slate/kubeadm.conf.epp', { 'config' => deep_merge($config, $base_config) })
   }
   -> exec { 'kubeadm join':
     command     => 'kubeadm join --config /etc/kubernetes/kubeadm-join.conf',

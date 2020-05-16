@@ -46,13 +46,11 @@ class slate::kubernetes::controller (
     -> Class['slate::kubernetes::cluster_management::metallb']
 
     if $cluster_instantiating {
-      contain slate::kubernetes::cluster_init
+      contain slate::kubernetes::kubeadm_init
 
       File['/etc/kubernetes/default-audit-policy.yaml']
-      -> Class['slate::kubernetes::cluster_init']
+      -> Class['slate::kubernetes::kubeadm_init']
       -> Class['slate::kubernetes::cluster_management::calico']
-
-      Class['slate::kubernetes::cluster_init']
       -> Class['slate::kubernetes::cluster_management::token_cleanup']
     }
   }

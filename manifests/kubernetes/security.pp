@@ -22,14 +22,10 @@
 #   See $slate::kubernetes::schedule_on_controller
 #
 class slate::kubernetes::security (
-  # 6443 - kube-apiserver, 2379-2380 - etcd, 10251 - kube-scheduler, 10252 - kube-controller-manager
-  Array[String] $controller_ports = ['6443', '2379-2380', '10251-10252'],
-  # 10250 - kubelet
-  Array[String] $general_ports = ['10250'],
-  # 179 - bgp
-  Array[String] $calico_ports = ['179'],
-  # 30000-32767 - default node port range
-  Array[String] $nodeport_services = ['30000-32767'],
+  Array[String] $controller_ports,
+  Array[String] $general_ports,
+  Array[String] $calico_ports,
+  Array[String] $nodeport_services,
   $role = $slate::kubernetes::role,
   $schedule_on_controller = $slate::kubernetes::schedule_on_controller,
 ) {
