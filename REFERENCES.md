@@ -206,8 +206,6 @@ The port the cluster should listen on.
 Similarly to `controller_hostname`, this should be the port of the load balancer if the cluster is intended to be a high-availability
 cluster. If it is intended to be a single-availability cluster, you can set this to the port of the single controller node.
 
-Default value: 6443
-
 ##### `schedule_on_controller`
 
 Data type: `Boolean`
@@ -216,8 +214,6 @@ If true and role is set to 'initial_controller' or 'controller', this node will 
 this node.
 If false and role is set to 'initial_controller' or 'controller', this node will be tainted to prevent Pods from being scheduled on it.
 Note, this is specific to individual controller nodes.
-
-Default value: `true`
 
 ##### `cgroup_driver`
 
