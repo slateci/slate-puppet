@@ -14,6 +14,7 @@ slate::packages::package_list:
   - sysstat
   - jq
   - curl
+  - bash-completion
 slate::accounts::user_accounts:
   lincolnb:
     sshkeys:
