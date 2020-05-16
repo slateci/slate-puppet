@@ -42,7 +42,7 @@ class slate::kubernetes::cluster_management::metallb (
     command     => 'kubectl create secret generic -n metallb-system memberlist --from-literal=secretkey="$(openssl rand -base64 128)"',
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
-    onlyif      => 'test "$(kubectl get secrets -n metallb-system 2>&1)" = "No resources found."',
+    unless      => 'kubectl get secrets -n metallb-system memberlist',
   }
 
   -> exec { 'apply metallb config':
