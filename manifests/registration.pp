@@ -51,17 +51,18 @@ class slate::registration (
       command     => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
       environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+      # TODO(emersonford): Use a better check for this unless.
+      unless      => "slate cluster list | grep ${cluster_name}",
   }
 
-  -> exec { 'join SLATE federation':
+  ~> exec { 'join SLATE federation':
     command     => "slate cluster create '${cluster_name}' ${cli_flags}",
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-    # TODO(emersonford): Use a better check for this unless.
-    unless      => "slate cluster list | grep ${cluster_name}",
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
     timeout     => 300,
     notify      => Exec['update cluster location'],
     require     => File['/root/.slate/token'],
+    refreshonly => true,
   }
 
   if $cluster_location {
