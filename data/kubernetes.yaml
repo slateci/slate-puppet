@@ -8,19 +8,19 @@ slate::kubernetes::controller_port: 6443
 slate::kubernetes::schedule_on_controller: true
 slate::kubernetes::security::controller_ports:
 # kube-apiserver
-- 6443
+- '6443'
 # etcd
-- 2379-2380
+- '2379-2380'
 # kube-scheduler, kube-controller-manager
-- 10251-10252
+- '10251-10252'
 slate::kubernetes::security::general_ports:
 # kubelet
-- 10250
+- '10250'
 slate::kubernetes::security::calico_ports:
 # bgp
-- 179
+- '179'
 slate::kubernetes::security::nodeport_services:
-- 30000-32767
+- '30000-32767'
 slate::kubernetes::kubeadm_join::use_puppetdb: true
 slate::kubernetes::kubeadm_join::join_token:
 #  certificateKey:
