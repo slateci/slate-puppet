@@ -2,6 +2,9 @@
 #   This class handles pre-Kubernetes installation steps such as disabling swap,
 #   setting up kernel modules, etc.
 #
+# @param k8s_sysctl_path
+#   The path to store k8s sysctl parameters.
+#
 class slate::kubernetes::pre (
   String $k8s_sysctl_path = '/etc/sysctl.d/k8s.conf',
 ) {
