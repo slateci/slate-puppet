@@ -39,6 +39,7 @@ slate::kubernetes::kubeadm_init::config_versions:
   KubeProxyConfiguration: 'kubeproxy.config.k8s.io/v1alpha1'
 # Default Kubelet config for nodes joining via `kubeadm join`.
 # Set per-node Kubelet configs in slate::kubernetes::kubelet::config.
+# Note: beware of configuration drift, changing this does _not_ change the kubelet config of all other running nodes.
   KubeletConfiguration: 'kubelet.config.k8s.io/v1beta1'
 slate::kubernetes::kubeadm_init::config:
   ClusterConfiguration:
@@ -47,24 +48,24 @@ slate::kubernetes::kubeadm_init::config:
       podSubnet: 192.168.0.0/16
       serviceSubnet: 10.96.0.0/12
     featureGates:
-      "RotateKubeletClientCertificate": true
-      "RotateKubeletServerCertificate": true
+      RotateKubeletClientCertificate: true
+      RotateKubeletServerCertificate: true
     controllerManager:
       extraArgs:
-        "controllers": "*,bootstrapsigner,tokencleaner"
-        "terminated-pod-gc-threshold": 10
-        "profiling": false
+        controllers: "*,bootstrapsigner,tokencleaner"
+        terminated-pod-gc-threshold: "10"
+        profiling: "false"
     apiServer:
       extraArgs:
-        "anonymous-auth": false
-        "kubelet-certificate-authority": "/etc/kubernetes/pki/ca.crt"
-        "profiling": false
-        "audit-policy-file": "/etc/kubernetes/default-audit-policy.yaml"
-        "audit-log-path": "/var/log/kubernetes/audit/kube-apiserver-audit.log"
-        "audit-log-maxage": 30
-        "audit-log-maxbackup": 10
-        "audit-log-maxsize": 100
-        "tls-cipher-suites": "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
+        anonymous-auth: "false"
+        kubelet-certificate-authority: "/etc/kubernetes/pki/ca.crt"
+        profiling: "false"
+        audit-policy-file: "/etc/kubernetes/default-audit-policy.yaml"
+        audit-log-path: "/var/log/kubernetes/audit/kube-apiserver-audit.log"
+        audit-log-maxage: "30"
+        audit-log-maxbackup: "10"
+        audit-log-maxsize: "100"
+        tls-cipher-suites: "TLS_ECDHE_ECDSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_RSA_WITH_AES_128_GCM_SHA256,TLS_ECDHE_ECDSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_RSA_WITH_AES_256_GCM_SHA384,TLS_ECDHE_RSA_WITH_CHACHA20_POLY1305,TLS_ECDHE_ECDSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_256_GCM_SHA384,TLS_RSA_WITH_AES_128_GCM_SHA256"
       extraVolumes:
       - name: "audit-policy"
         hostPath: "/etc/kubernetes/default-audit-policy.yaml"
@@ -78,7 +79,7 @@ slate::kubernetes::kubeadm_init::config:
         pathType: DirectoryOrCreate
     scheduler:
       extraArgs:
-        "profiling": false
+        profiling: "false"
 slate::kubernetes::cluster_management::metallb::namespace_url: 'https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml'
 slate::kubernetes::cluster_management::metallb::manifest_url: 'https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml'
 slate::kubernetes::cluster_management::metallb::config:
