@@ -9,6 +9,9 @@ class slate::kubernetes::kubelet (
 ) {
   file { '/etc/systemd/system/kubelet.service.d':
     ensure => directory,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0644',
   }
   # RedHat needs to have CPU and Memory accounting enabled to avoid systemd proc errors
   # https://github.com/kubernetes/kubernetes/issues/85883
