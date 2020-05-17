@@ -163,7 +163,7 @@ If `manage_kubernetes` is set to `false`, no `slate::kubernetes` parameters are 
 ## How Do I?
 ### Change podSubnet, serviceSubnet, etc
 These are specified in the `slate::kubernetes::kubeadm_init::config` parameter. The default value for this parameter in `data/kubernetes.yaml` ensures the cluster is CIS compliant, so it is not recommended you completely override the default parameter. Rather, we recommend one of two options:
-* Copy the default parameter in `date/slate.yaml` and replace values as needed.
+* Copy the default parameter in `data/slate.yaml` and replace values as needed.
 * Use `deep_merge` behavior in Hiera (https://puppet.com/docs/puppet/5.5/configure_merge_behavior_hiera.html)
 
 ## Limitations
