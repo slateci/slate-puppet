@@ -41,4 +41,24 @@ class slate::kubernetes::packages (
     ensure  => $kubernetes_version,
     require => Yumrepo['Kubernetes'],
   }
+
+  if 'kubectl' in $kube_packages {
+    exec { 'setup kubectl completions':
+      path        => ['/usr/sbin', '/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
+      command     => 'kubectl completion bash > /etc/bash_completion.d/kubectl',
+      refreshonly => true,
+      environment => ['HOME=/root'],
+      subscribe   => Package['kubectl'],
+    }
+  }
+
+  if 'kubeadm' in $kube_packages {
+    exec { 'setup kubeadm completions':
+      path        => ['/usr/sbin', '/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
+      command     => 'kubeadm completion bash > /etc/bash_completion.d/kubeadm',
+      refreshonly => true,
+      environment => ['HOME=/root'],
+      subscribe   => Package['kubeadm'],
+    }
+  }
 }
