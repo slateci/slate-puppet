@@ -99,6 +99,14 @@ Includes the slate::accounts class to manage SLATE administrator accounts.
 
 Default value: `true`
 
+##### `enable_tuning`
+
+Data type: `Boolean`
+
+Sets specific `sysctl` parameters to better tune for Kubernetes performance.
+
+Default value: `true`
+
 ### slate::accounts
 
 This class creates SLATE administrator accounts and places them in the 'slateadm' group.
@@ -357,7 +365,7 @@ If false, the `join_token` parameter will be used.
 
 Default value: `true`
 
-##### `join_token`
+##### `join_tokens`
 
 Data type: `Optional[Struct[{
     certificate_key => Optional[String],
