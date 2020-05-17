@@ -48,13 +48,53 @@ class slate::registration (
   # This will fail if kubectl is not working, providing feedback as to why SLATE cluster creation
   # may not be working.
   exec { 'check kubectl is working':
-      command     => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
-      path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
-      environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
-      # TODO(emersonford): Use a better check for this unless.
-      unless      => "slate cluster list | grep ${cluster_name}",
+    command     => 'test -f /etc/kubernetes/admin.conf && kubectl get nodes',
+    path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
+    environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+    # TODO(emersonford): Use a better check for this unless.
+    # Place this here so we only trigger these resources blocks once.
+    unless      => "slate cluster list | grep ${cluster_name}",
   }
-
+  ~> exec { 'wait for kube-system/calico pods to be ready':
+    command     => @(EOF/L)
+    test ! $(kubectl get pods -n kube-system \
+    -o jsonpath='{range .items[*]}{range @.status.conditions[*]}{@.type}={@.status};{end}{end}' \
+    | grep 'Ready=False')
+    | - EOF
+    ,
+    unless      => @(EOF/L)
+    test ! $(kubectl get pods -n kube-system \
+    -o jsonpath='{range .items[*]}{range @.status.conditions[*]}{@.type}={@.status};{end}{end}' \
+    | grep 'Ready=False')
+    | - EOF
+    ,
+    path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
+    environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+    # Waits 5 minutes max.
+    tries       => 20,
+    try_sleep   => 15,
+    refreshonly => true,
+  }
+  ~> exec { 'wait for metallb pods to be ready':
+    command     => @(EOF/L)
+    test ! $(kubectl get pods -n metallb-system \
+    -o jsonpath='{range .items[*]}{range @.status.conditions[*]}{@.type}={@.status};{end}{end}' \
+    | grep 'Ready=False')
+    | - EOF
+    ,
+    unless      => @(EOF/L)
+    test ! $(kubectl get pods -n metallb-system \
+    -o jsonpath='{range .items[*]}{range @.status.conditions[*]}{@.type}={@.status};{end}{end}' \
+    | grep 'Ready=False')
+    | - EOF
+    ,
+    path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
+    environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+    # Waits 5 minutes max.
+    tries       => 20,
+    try_sleep   => 15,
+    refreshonly => true,
+  }
   ~> exec { 'join SLATE federation':
     command     => "slate cluster create '${cluster_name}' ${cli_flags}",
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
@@ -62,6 +102,7 @@ class slate::registration (
     timeout     => 300,
     notify      => Exec['update cluster location'],
     require     => File['/root/.slate/token'],
+    logoutput   => true,
     refreshonly => true,
   }
 
