@@ -46,6 +46,7 @@
 #   this node.
 #   If false and role is set to 'initial_controller' or 'controller', this node will be tainted to prevent Pods from being scheduled on it.
 #   Note, this is specific to individual controller nodes.
+#   Note, this is required to be set to true for single node clusters.
 # @param cgroup_driver
 #   The cgroup_driver to use with Docker. The kubelet config is changed to reflect this cgroup_driver.
 #

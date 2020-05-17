@@ -21,7 +21,7 @@ class slate::kubernetes::controller (
   }
 
   if $schedule_on_controller {
-    exec { 'schedule on controller':
+    exec { "set schedule on controller to ${schedule_on_controller}":
       command     => "kubectl taint nodes ${node_name} node-role.kubernetes.io/master-",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
       onlyif      => "kubectl describe nodes ${node_name} | tr -s ' ' | grep 'Taints: node-role.kubernetes.io/master:NoSchedule'",
@@ -29,7 +29,7 @@ class slate::kubernetes::controller (
     }
   }
   else {
-    exec { 'disable scheduling on controller':
+    exec { "set schedule on controller to ${schedule_on_controller}":
       command     => "kubectl taint nodes ${node_name} node-role.kubernetes.io/master=:NoSchedule",
       path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
       unless      => "kubectl describe nodes ${node_name} | tr -s ' ' | grep 'Taints: node-role.kubernetes.io/master:NoSchedule'",
@@ -50,6 +50,7 @@ class slate::kubernetes::controller (
 
       File['/etc/kubernetes/default-audit-policy.yaml']
       -> Class['slate::kubernetes::kubeadm_init']
+      -> Exec["set schedule on controller to ${schedule_on_controller}"]
       -> Class['slate::kubernetes::cluster_management::calico']
       -> Class['slate::kubernetes::cluster_management::token_cleanup']
     }
