@@ -47,7 +47,8 @@ class slate::security (
     before  => Class['slate::firewall::post'],
     require => Class['slate::firewall::pre'],
   }
-  -> firewallchain { 'SLATE-GENERAL:filter:IPv4':
+
+  firewallchain { 'SLATE-GENERAL:filter:IPv4':
     ensure => present,
   }
 
