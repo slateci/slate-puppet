@@ -9,7 +9,8 @@
 #   for all configuration settings. _Do not_ supply JoinConfiguration:nodeRegistration:name,
 #   JoinConfiguration:discovery:bootstrapToken, or JoinConfiguration:controlPlane:certificateKey as these will be overridden
 #   by other parameters.
-#   Each configuration type must be present in config_versions.
+#   Each configuration type must be present in config_versions. If some configuration values are not specified,
+#   kubeadm will use default values for them.
 # @param config_versions
 #   A hash mapping each configuration type to its apiVersion.
 # @param use_puppetdb

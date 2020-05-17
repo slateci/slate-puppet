@@ -37,6 +37,8 @@ slate::kubernetes::kubeadm_init::config_versions:
   InitConfiguration: 'kubeadm.k8s.io/v1beta2'
   ClusterConfiguration: 'kubeadm.k8s.io/v1beta2'
   KubeProxyConfiguration: 'kubeproxy.config.k8s.io/v1alpha1'
+# Default Kubelet config for nodes joining via `kubeadm join`.
+# Set per-node Kubelet configs in slate::kubernetes::kubelet::config.
   KubeletConfiguration: 'kubelet.config.k8s.io/v1beta1'
 slate::kubernetes::kubeadm_init::config:
   ClusterConfiguration:
