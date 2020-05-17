@@ -8,7 +8,12 @@
 #
 # @see https://github.com/puppetlabs/puppetlabs-firewall
 #
-class slate::security {
+# @param slate_ports
+#   List of TCP ports to open for a SLATE-specific needs.
+#
+class slate::security (
+  Array[String] $slate_ports = [],
+) {
   include 'slate::firewall::pre'
   include 'slate::firewall::post'
 
@@ -41,6 +46,25 @@ class slate::security {
   Firewall {
     before  => Class['slate::firewall::post'],
     require => Class['slate::firewall::pre'],
+  }
+  -> firewallchain { 'SLATE-GENERAL:filter:IPv4':
+    ensure => present,
+  }
+
+  firewall { '200 check general SLATE ports':
+    proto => 'tcp',
+    jump  => 'SLATE-GENERAL',
+    chain => 'INPUT',
+  }
+
+  if length($slate_ports) > 0 {
+    firewall { '100 accept general SLATE ports':
+      proto  => 'tcp',
+      dport  => $slate_ports,
+      action => 'accept',
+      state  => 'NEW',
+      chain  => 'SLATE-GENERAL',
+    }
   }
 
   file_line { 'PermitRootLogin no':

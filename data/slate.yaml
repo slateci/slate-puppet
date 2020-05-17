@@ -15,6 +15,7 @@ slate::packages::package_list:
   - jq
   - curl
   - bash-completion
+slate::security::slate_ports:
 slate::accounts::user_accounts:
   lincolnb:
     sshkeys:
