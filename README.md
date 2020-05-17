@@ -5,10 +5,15 @@ A Puppet module to manage nodes as part of SLATE. Can handles instantiation and 
 #### Table of Contents
 
 1. [Description](#description)
-2. [Setup - The basics of getting started with slate-puppet](#setup)
+2. [Setup](#setup)
     * [What slate-puppet affects](#what-slate-puppet-affects)
-    * [Setup requirements](#setup-requirements)
-3. [Usage - Configuration options and additional functionality](#usage)
+    * [Requirements](#requirements)
+    * [Installation](#installation)
+3. [Usage](#usage)
+    * [Default (multi-master/multi-worker with no existing cluster)](#default)
+    * [Single Node Cluster](#single-node-cluster)
+    * [Existing Cluster](#existing-cluster)
+    * [Picking and Choosing Settings](#picking-and-choosing-settings)
 
 ## Description
 
@@ -43,11 +48,9 @@ This module, by default, will manage things such as:
 * SLATE cluster registration
 * Per-node Kubernetes installation/management
 
-### Setup Requirements
+### Requirements
 
 This module only supports CentOS 7. All nodes must be running CentOS 7.
-
-To install, find the most recent package release at https://github.com/slateci/slate-puppet/releases, download it, and run `puppet module install slate-slate-VER.tar.gz` on your Puppet Master.
 
 In order to have automatic join token discovery functioning, PuppetDB must be installed with your Puppet Master (see https://puppet.com/docs/puppetdb/latest/index.html). If PuppetDB is not installed, the following Hiera parameters are required to join new nodes to an existing cluster:
 ```
@@ -59,6 +62,10 @@ slate::kubernetes::kubeadm_join::join_tokens:
   discovery_ca_cert_hash: ''
 ```
 These can be obtained by following the guide on https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#join-nodes.
+
+### Installation
+
+To install, find the most recent package release at https://github.com/slateci/slate-puppet/releases, download it, and run `puppet module install slate-slate-VER.tar.gz` on your Puppet Master.
 
 ## Usage
 
