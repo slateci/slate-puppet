@@ -22,7 +22,7 @@ slate::kubernetes::security::calico_ports:
 slate::kubernetes::security::nodeport_services:
 - '30000-32767'
 slate::kubernetes::kubeadm_join::use_puppetdb: true
-slate::kubernetes::kubeadm_join::join_token:
+slate::kubernetes::kubeadm_join::join_tokens:
 #  certificateKey:
 #  discovery_token:
 #  discovery_ca_cert_hash:

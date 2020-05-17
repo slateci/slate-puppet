@@ -12,7 +12,7 @@
 # @param use_puppetdb
 #   If true, automatically discover join tokens through PuppetDB. PuppetDB must be enabled on the Puppet Master.
 #   If false, the `join_token` parameter will be used.
-# @param join_token
+# @param join_tokens
 #   The tokens to be used in the `kubeadm join` process. If `use_puppetdb` is false, this parameter must be specified.
 #   `certificate_key` is only required for controller nodes.
 # @param role
@@ -29,7 +29,7 @@ class slate::kubernetes::kubeadm_join (
     certificate_key => Optional[String],
     discovery_token => String,
     discovery_ca_cert_hash => String,
-  }]] $join_token,
+  }]] $join_tokens,
   $role = $slate::kubernetes::role,
   $controller_hostname = $slate::kubernetes::controller_hostname,
   $controller_port = $slate::kubernetes::controller_port,
@@ -38,12 +38,12 @@ class slate::kubernetes::kubeadm_join (
 
   # Pull join tokens from PuppetDB.
   if $use_puppetdb {
-    $join_tokens = puppetdb_query(epp('slate/join_tokens_query.epp', {
+    $pdb_join_tokens = puppetdb_query(epp('slate/join_tokens_query.epp', {
       'hostname' => $controller_hostname,
       'port' => $controller_port,
     }))
 
-    if length($join_tokens) == 0 {
+    if length($pdb_join_tokens) == 0 {
       fail(
         @("EOF"/L)
         Join tokens not found for ${controller_hostname}:${controller_port}. \
@@ -54,11 +54,14 @@ class slate::kubernetes::kubeadm_join (
     }
 
     else {
-      $join_token = $join_tokens[0]['facts.slate.kubernetes']
+      $join_token = $pdb_join_tokens[0]['facts.slate.kubernetes']
     }
   }
-  elsif $join_token == undef {
+  elsif $join_tokens == undef {
     fail('Join tokens were not provided with `use_puppetdb` set to false, cannot run `kubeadm join`...')
+  }
+  else {
+    $join_token = $join_tokens
   }
 
   $base_config_ = {
