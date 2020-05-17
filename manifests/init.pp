@@ -12,19 +12,25 @@
 #   This is required for manage_kubernetes.
 # @param manage_slate_admin_accounts
 #   Includes the slate::accounts class to manage SLATE administrator accounts.
+# @param enable_tuning
+#   Sets specific `sysctl` parameters to better tune for Kubernetes performance.
 #
 class slate (
   Boolean $manage_kubernetes = true,
   Boolean $register_with_slate = true,
   Boolean $apply_security_policy = true,
   Boolean $manage_slate_admin_accounts = true,
+  Boolean $enable_tuning = true,
 ) {
   if $facts['os']['family'] != 'RedHat' or $facts['os']['release']['major'] != '7' {
     fail('This module is only supported on RedHat 7/CentOS 7.')
   }
 
   contain slate::packages
-  contain slate::tuning
+
+  if $enable_tuning {
+    contain slate::tuning
+  }
 
   if $apply_security_policy {
     contain slate::security
