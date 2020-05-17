@@ -14,6 +14,9 @@ A Puppet module to manage nodes as part of SLATE. Can handles instantiation and 
     * [Single Node Cluster](#single-node-cluster)
     * [Existing Cluster](#existing-cluster)
     * [Picking and Choosing Settings](#picking-and-choosing-settings)
+4. [How Do I?](#how-do-i)
+    * [Change podSubnet, serviceSubnet, etc](#change-podsubnet-servicesubnet-etc)
+5. [Limitations](#limitations)
 
 ## Description
 
@@ -33,6 +36,7 @@ It is designed to be highly modular where nearly all modules could be included i
 Thus, this module could be used solely to bring up a Kubernetes cluster, or used solely to register an existing cluster with SLATE.
 
 This module uses Hiera extensively, nearly all parameters must be passed in through Hiera.
+See `data/slate.yaml` for the default SLATE specific Hiera parameters and `data/kubernetes.yaml` for the default Kubernetes specific Hiera parameters.
 
 ## Setup
 
@@ -76,8 +80,11 @@ It is _highly_ recommended that the
 ```
 slate::kubernetes::docker_version:
 slate::kubernetes::kubernetes_version:
+slate::kubernetes::cluster_management::metallb::namespace_url:
+slate::kubernetes::cluster_management::metallb::manifest_url:
+slate::kubernetes::cluster_management::calico::manifest_url:
 ```
-Hiera parameters are set on a _per node_ basis to avoid accidental package upgrades. See REFERENCES.md for an explanation why.
+Hiera parameters are set on a _per node_ basis to avoid accidental package/manifest upgrades. See REFERENCES.md for an explanation why.
 
 This module can be used in variety of scenarios:
 
@@ -153,6 +160,17 @@ If `manage_kubernetes` is set to `false`, no `slate::kubernetes` parameters are 
 
 `apply_security_policy` must be set to `true` if `manage_kubernetes` is set to `true`. See REFERENCES.md for more details on each parameter.
 
+## How Do I?
+### Change podSubnet, serviceSubnet, etc
+These are specified in the `slate::kubernetes::kubeadm_init::config` parameter. The default value for this parameter in `data/kubernetes.yaml` ensures the cluster is CIS compliant, so it is not recommended you completely override the default parameter. Rather, we recommend one of two options:
+* Copy the default parameter in `date/slate.yaml` and replace values as needed.
+* Use `deep_merge` behavior in Hiera (https://puppet.com/docs/puppet/5.5/configure_merge_behavior_hiera.html)
+
 ## Limitations
 
-This module is not intended for running management of Kubernetes clusters. Only MetalLB config changes, MetalLB upgrades, and Calico upgrades will be applied to running clusters. All other configurations supplied in Hiera will _only_ be applied during cluster instantiation time (i.e. during `kubeadm init`).
+This module is not intended for running management of Kubernetes clusters. Only the following configurations are updated for running clusters:
+* MetalLB config changes
+* MetalLB upgrades
+* Calico upgrades
+
+All other configurations supplied in Hiera will _only_ be applied during cluster instantiation time (i.e. during `kubeadm init`).
