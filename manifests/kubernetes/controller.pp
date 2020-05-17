@@ -53,6 +53,15 @@ class slate::kubernetes::controller (
       -> Exec["set schedule on controller to ${schedule_on_controller}"]
       -> Class['slate::kubernetes::cluster_management::calico']
       -> Class['slate::kubernetes::cluster_management::token_cleanup']
+
+      if !$schedule_on_controller {
+        warning(
+          @(EOF/L)
+          $schedule_on_controller was set to false for kubeadm_init. SLATE registration will fail on this run as \
+          there will be no nodes to schedule the MetalLB controller or NRP controller pods.
+          | EOF
+        )
+      }
     }
   }
   elsif !$joined_to_cluster {
