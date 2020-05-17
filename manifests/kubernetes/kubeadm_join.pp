@@ -3,12 +3,15 @@
 #   If PuppetDB is used, the join tokens can be automatically discovered by nodes.
 #
 # @param config
-#   A hash where each key maps to a YAML-compatible hash to be passed to kubeadm join as a config file.
+#   A hash where each key is a configuration type that maps to a YAML-compatible hash to be passed to kubeadm join as a config file.
 #   See data/common.yaml for an example.
 #   See https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#hdr-Kubeadm_join_configuration_types
 #   for all configuration settings. _Do not_ supply JoinConfiguration:nodeRegistration:name,
 #   JoinConfiguration:discovery:bootstrapToken, or JoinConfiguration:controlPlane:certificateKey as these will be overridden
 #   by other parameters.
+#   Each configuration type must be present in config_versions.
+# @param config_versions
+#   A hash mapping each configuration type to its apiVersion.
 # @param use_puppetdb
 #   If true, automatically discover join tokens through PuppetDB. PuppetDB must be enabled on the Puppet Master.
 #   If false, the `join_token` parameter will be used.
@@ -23,7 +26,8 @@
 #   See $slate::kubernetes::controller_port.
 #
 class slate::kubernetes::kubeadm_join (
-  Hash[Enum['JoinConfiguration'], Hash] $config = {},
+  Hash[String, Hash] $config = {},
+  Hash[String, String] $config_versions = {},
   Boolean $use_puppetdb = true,
   Optional[Struct[{
     certificate_key => Optional[String],
@@ -119,7 +123,7 @@ class slate::kubernetes::kubeadm_join (
     owner   => 'root',
     group   => 'root',
     mode    => '0600',
-    content => epp('slate/kubeadm.conf.epp', { 'config' => deep_merge($config, $base_config) })
+    content => epp('slate/kubeadm.conf.epp', { 'config' => deep_merge($config, $base_config), 'config_versions' => $config_versions })
   }
   -> exec { 'kubeadm join':
     command     => 'kubeadm join --config /etc/kubernetes/kubeadm-join.conf',

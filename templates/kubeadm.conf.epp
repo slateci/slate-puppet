@@ -1,5 +1,7 @@
 <%- $config.each |$key, $value| { -%>
+<%- if !($key in $config_versions) { -%>
+<%- fail("${key} is not present in config_versions. Must be one of ${keys($config_versions)}") } -%>
 <%= to_yaml($value) -%>
-apiVersion: kubeadm.k8s.io/v1beta2
+apiVersion: <%= $config_versions[$key] %>
 kind: <%= $key %>
 <% } -%>

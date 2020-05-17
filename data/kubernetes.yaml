@@ -26,11 +26,18 @@ slate::kubernetes::kubeadm_join::join_tokens:
 #  certificateKey:
 #  discovery_token:
 #  discovery_ca_cert_hash:
+slate::kubernetes::kubeadm_join::config_versions:
+  JoinConfiguration: 'kubeadm.k8s.io/v1beta2'
 slate::kubernetes::kubeadm_join::config:
   JoinConfiguration:
     nodeRegistration:
       taints: null
 # Cluster settings
+slate::kubernetes::kubeadm_init::config_versions:
+  InitConfiguration: 'kubeadm.k8s.io/v1beta2'
+  ClusterConfiguration: 'kubeadm.k8s.io/v1beta2'
+  KubeProxyConfiguration: 'kubeproxy.config.k8s.io/v1alpha1'
+  KubeletConfiguration: 'kubelet.config.k8s.io/v1beta1'
 slate::kubernetes::kubeadm_init::config:
   ClusterConfiguration:
     networking:
