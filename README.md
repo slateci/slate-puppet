@@ -10,7 +10,7 @@ A Puppet module to manage nodes as part of SLATE. Can handles instantiation and 
     * [Requirements](#requirements)
     * [Installation](#installation)
 3. [Usage](#usage)
-    * [Default (multi-master/multi-worker with no existing cluster)](#default)
+    * [Default (multi-master/multi-worker with no existing cluster)](#default-multi-mastermulti-worker-with-no-existing-cluster)
     * [Single Node Cluster](#single-node-cluster)
     * [Existing Cluster](#existing-cluster)
     * [Picking and Choosing Settings](#picking-and-choosing-settings)
