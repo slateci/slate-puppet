@@ -303,18 +303,23 @@ The following parameters are available in the `slate::kubernetes::kubeadm_init` 
 
 ##### `config`
 
-Data type: `Hash[Enum[
-    'InitConfiguration',
-    'ClusterConfiguration',
-    'KubeProxyConfiguration',
-    'KubeletConfiguration',
-    ], Hash]`
+Data type: `Hash[String, Hash]`
 
-A hash where each key maps to a YAML-compatible hash to be passed to kubeadm init as a config file.
+A hash where each key is a configuration type that maps to a YAML-compatible hash to be passed to kubeadm init as a config file.
 See data/common.yaml for an example.
 See https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#hdr-Kubeadm_init_configuration_types
 for all configuration settings. _Do not_ supply InitConfiguration:nodeRegistration:name or
 ClusterConfiguration:controlPlaneEndpoint as these will be overridden by other paramters.
+Each configuration type must be present in config_versions. If some configuration values are not specified,
+kubeadm will use default values for them.
+
+Default value: {}
+
+##### `config_versions`
+
+Data type: `Hash[String, String]`
+
+A hash mapping each configuration type to its apiVersion.
 
 Default value: {}
 
@@ -345,14 +350,24 @@ The following parameters are available in the `slate::kubernetes::kubeadm_join` 
 
 ##### `config`
 
-Data type: `Hash[Enum['JoinConfiguration'], Hash]`
+Data type: `Hash[String, Hash]`
 
-A hash where each key maps to a YAML-compatible hash to be passed to kubeadm join as a config file.
+A hash where each key is a configuration type that maps to a YAML-compatible hash to be passed to kubeadm join as a config file.
 See data/common.yaml for an example.
 See https://godoc.org/k8s.io/kubernetes/cmd/kubeadm/app/apis/kubeadm/v1beta2#hdr-Kubeadm_join_configuration_types
 for all configuration settings. _Do not_ supply JoinConfiguration:nodeRegistration:name,
 JoinConfiguration:discovery:bootstrapToken, or JoinConfiguration:controlPlane:certificateKey as these will be overridden
 by other parameters.
+Each configuration type must be present in config_versions. If some configuration values are not specified,
+kubeadm will use default values for them.
+
+Default value: {}
+
+##### `config_versions`
+
+Data type: `Hash[String, String]`
+
+A hash mapping each configuration type to its apiVersion.
 
 Default value: {}
 
@@ -615,6 +630,18 @@ Rules starting with '900' to '999' will be placed after unmanaged rules.
 
 * **See also**
 https://github.com/puppetlabs/puppetlabs-firewall
+
+#### Parameters
+
+The following parameters are available in the `slate::security` class.
+
+##### `slate_ports`
+
+Data type: `Array[String]`
+
+List of TCP ports to open for a SLATE-specific needs.
+
+Default value: []
 
 ### slate::tuning
 
