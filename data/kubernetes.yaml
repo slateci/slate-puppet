@@ -29,17 +29,14 @@ slate::kubernetes::kubeadm_join::join_tokens:
 slate::kubernetes::kubeadm_join::config_versions:
   JoinConfiguration: 'kubeadm.k8s.io/v1beta2'
 slate::kubernetes::kubeadm_join::config:
-  JoinConfiguration:
-    nodeRegistration:
-      taints: null
+#  JoinConfiguration:
+#    nodeRegistration:
+###########################################################
 # Cluster settings
 slate::kubernetes::kubeadm_init::config_versions:
   InitConfiguration: 'kubeadm.k8s.io/v1beta2'
   ClusterConfiguration: 'kubeadm.k8s.io/v1beta2'
   KubeProxyConfiguration: 'kubeproxy.config.k8s.io/v1alpha1'
-# Default Kubelet config for nodes joining via `kubeadm join`.
-# Set per-node Kubelet configs in slate::kubernetes::kubelet::config.
-# Note: beware of configuration drift, changing this does _not_ change the kubelet config of all other running nodes.
   KubeletConfiguration: 'kubelet.config.k8s.io/v1beta1'
 slate::kubernetes::kubeadm_init::config:
   ClusterConfiguration:
@@ -47,9 +44,6 @@ slate::kubernetes::kubeadm_init::config:
       dnsDomain: cluster.local
       podSubnet: 192.168.0.0/16
       serviceSubnet: 10.96.0.0/12
-    featureGates:
-      RotateKubeletClientCertificate: true
-      RotateKubeletServerCertificate: true
     controllerManager:
       extraArgs:
         controllers: "*,bootstrapsigner,tokencleaner"
@@ -57,8 +51,6 @@ slate::kubernetes::kubeadm_init::config:
         profiling: "false"
     apiServer:
       extraArgs:
-        anonymous-auth: "false"
-        kubelet-certificate-authority: "/etc/kubernetes/pki/ca.crt"
         profiling: "false"
         audit-policy-file: "/etc/kubernetes/default-audit-policy.yaml"
         audit-log-path: "/var/log/kubernetes/audit/kube-apiserver-audit.log"
@@ -80,6 +72,11 @@ slate::kubernetes::kubeadm_init::config:
     scheduler:
       extraArgs:
         profiling: "false"
+  KubeletConfiguration:
+    featureGates:
+      RotateKubeletClientCertificate: true
+      RotateKubeletServerCertificate: true
+    readOnlyPort: 0
 slate::kubernetes::cluster_management::metallb::namespace_url: 'https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml'
 slate::kubernetes::cluster_management::metallb::manifest_url: 'https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml'
 slate::kubernetes::cluster_management::metallb::config:
