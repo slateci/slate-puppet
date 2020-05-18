@@ -49,6 +49,7 @@ slate::kubernetes::kubeadm_init::config:
         controllers: "*,bootstrapsigner,tokencleaner"
         terminated-pod-gc-threshold: "10"
         profiling: "false"
+        feature-gates: "RotateKubeletServerCertificate=true"
     apiServer:
       extraArgs:
         profiling: "false"
@@ -77,6 +78,7 @@ slate::kubernetes::kubeadm_init::config:
       RotateKubeletClientCertificate: true
       RotateKubeletServerCertificate: true
     readOnlyPort: 0
+    cgroupDriver: 'systemd'
 slate::kubernetes::cluster_management::metallb::namespace_url: 'https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml'
 slate::kubernetes::cluster_management::metallb::manifest_url: 'https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml'
 slate::kubernetes::cluster_management::metallb::config:
