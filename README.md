@@ -67,6 +67,8 @@ slate::kubernetes::kubeadm_join::join_tokens:
 ```
 These can be obtained by following the guide on https://kubernetes.io/docs/setup/production-environment/tools/kubeadm/create-cluster-kubeadm/#join-nodes.
 
+For existing clusters, `kubectl` must be installed on _every_ controller node.
+
 ### Installation
 
 To install, find the most recent package release at https://github.com/slateci/slate-puppet/releases, download it, and run `puppet module install slate-slate-VER.tar.gz` on your Puppet Master.
@@ -80,11 +82,15 @@ It is _highly_ recommended that the
 ```
 slate::kubernetes::docker_version:
 slate::kubernetes::kubernetes_version:
+```
+Hiera parameters are set on a _per node_ basis and
+
+```
 slate::kubernetes::cluster_management::metallb::namespace_url:
 slate::kubernetes::cluster_management::metallb::manifest_url:
 slate::kubernetes::cluster_management::calico::manifest_url:
 ```
-Hiera parameters are set on a _per node_ basis to avoid accidental package/manifest upgrades. See REFERENCES.md for an explanation why.
+set on a _pre cluster_ basis to avoid accidental package/manifest upgrades. See REFERENCES.md for an explanation why.
 
 This module can be used in variety of scenarios:
 
