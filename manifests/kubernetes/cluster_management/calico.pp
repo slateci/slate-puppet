@@ -7,7 +7,13 @@ class slate::kubernetes::cluster_management::calico (
   String $manifest_url,
 ) {
   # https://docs.projectcalico.org/maintenance/troubleshoot/troubleshooting#configure-networkmanager
-  file { '/etc/NetworkManager/conf.d/calico.conf':
+  file { '/etc/NetworkManager/conf.d':
+    ensure => directory,
+    owner  => 'root',
+    group  => 'root',
+    mode   => '0755',
+  }
+  -> file { '/etc/NetworkManager/conf.d/calico.conf':
     ensure  => present,
     owner   => 'root',
     group   => 'root',
@@ -27,5 +33,6 @@ class slate::kubernetes::cluster_management::calico (
     path        => ['/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
     unless      => "kubectl diff -f ${shell_escape($manifest_url)}",
     environment => ['HOME=/root', 'KUBECONFIG=/etc/kubernetes/admin.conf'],
+    require     => File['/etc/NetworkManager/conf.d/calico.conf'],
   }
 }
