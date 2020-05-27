@@ -15,6 +15,7 @@ class slate::kubernetes::packages (
   String $kubernetes_version = $slate::kubernetes::kubernetes_version,
   String $docker_version = $slate::kubernetes::docker_version,
   String $docker_cgroup_driver = $slate::kubernetes::cgroup_driver,
+  Integer $minimum_systemd_release = 67,
 ) {
   if $install_kubectl {
     $kube_packages = ['kubelet', 'kubectl', 'kubeadm']
@@ -40,6 +41,13 @@ class slate::kubernetes::packages (
   -> package { $kube_packages:
     ensure  => $kubernetes_version,
     require => Yumrepo['Kubernetes'],
+  }
+
+  # Kind of a hacky way to make sure we have the right systemd version.
+  exec { "update systemd version to >= ${minimum_systemd_release}":
+    command => 'yum update systemd -y',
+    unless  => "test $(rpm -q --queryformat '%{RELEASE}' systemd | awk -F'.' '{print \$1}') -ge ${minimum_systemd_release}",
+    path    => ['/usr/sbin', '/usr/bin', '/bin', '/sbin', '/usr/local/bin'],
   }
 
   if 'kubectl' in $kube_packages {
