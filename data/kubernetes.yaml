@@ -6,6 +6,7 @@ slate::kubernetes::role:
 slate::kubernetes::controller_hostname:
 slate::kubernetes::controller_port: 6443
 slate::kubernetes::schedule_on_controller: true
+slate::kubernetes::cgroup_driver: 'systemd'
 slate::kubernetes::security::controller_ports:
 # kube-apiserver
 - '6443'
@@ -78,7 +79,7 @@ slate::kubernetes::kubeadm_init::config:
       RotateKubeletClientCertificate: true
       RotateKubeletServerCertificate: true
     readOnlyPort: 0
-    cgroupDriver: 'systemd'
+    cgroupDriver: "%{lookup('slate::kubernetes::cgroup_driver')}"
 slate::kubernetes::cluster_management::metallb::namespace_url: 'https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml'
 slate::kubernetes::cluster_management::metallb::manifest_url: 'https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml'
 slate::kubernetes::cluster_management::metallb::config:

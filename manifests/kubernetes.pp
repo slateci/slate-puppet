@@ -61,7 +61,7 @@ class slate::kubernetes (
   String $controller_hostname,
   Integer[1, 65565] $controller_port,
   Boolean $schedule_on_controller,
-  String $cgroup_driver = 'systemd',
+  String $cgroup_driver,
 ) {
   if fact('slate.kubernetes.kubelet_cluster_host') != undef and
     (fact('slate.kubernetes.kubelet_cluster_host') != $controller_hostname or
