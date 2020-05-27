@@ -82,15 +82,11 @@ It is _highly_ recommended that the
 ```
 slate::kubernetes::docker_version:
 slate::kubernetes::kubernetes_version:
-```
-Hiera parameters are set on a _per node_ basis and
-
-```
 slate::kubernetes::cluster_management::metallb::namespace_url:
 slate::kubernetes::cluster_management::metallb::manifest_url:
 slate::kubernetes::cluster_management::calico::manifest_url:
 ```
-set on a _pre cluster_ basis to avoid accidental package/manifest upgrades. See REFERENCES.md for an explanation why.
+Hiera parameters are set on a _per cluster_ basis to avoid accidental package/manifest upgrades. See REFERENCES.md for an explanation why.
 
 This module can be used in variety of scenarios:
 
