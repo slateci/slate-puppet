@@ -1,14 +1,14 @@
 # @summary
 #   This class handles installation of the SLATE CLI.
 #
+# @note This class requires `jq` and `curl` to be installed.
+#
 # @param endpoint_url
 #   The endpoint to use for the SLATE CLI.
 #
 class slate::cli (
   String $endpoint_url = 'https://api.slateci.io:18080',
 ) {
-  ensure_packages(['jq', 'curl', 'bash-completion'], { ensure => latest })
-
   file { '/root/.slate':
     ensure => directory,
   }
