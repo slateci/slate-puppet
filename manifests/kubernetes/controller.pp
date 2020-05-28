@@ -1,10 +1,14 @@
 # @summary
 #   This class handles joining clusters, instantiating clusters, and settings for controller nodes.
 #
+# @param manage_metallb
+#   Sets whether metallb is installed/configured by Puppet or not. Set to false on installation
+#   to disable MetalLB installation.
 # @param schedule_on_controller
 #   See $slate::kubernetes::schedule_on_controller.
 #
 class slate::kubernetes::controller (
+  Boolean $manage_metallb,
   $schedule_on_controller = $slate::kubernetes::schedule_on_controller,
 ) {
   $node_name = fact('networking.fqdn')
@@ -39,11 +43,16 @@ class slate::kubernetes::controller (
 
   if $cluster_instantiating or fact('slate.kubernetes.leader') {
     contain slate::kubernetes::cluster_management::calico
-    contain slate::kubernetes::cluster_management::metallb
     contain slate::kubernetes::cluster_management::token_cleanup
 
-    Class['slate::kubernetes::cluster_management::calico']
-    -> Class['slate::kubernetes::cluster_management::metallb']
+
+
+    if $manage_metallb {
+      contain slate::kubernetes::cluster_management::metallb
+
+      Class['slate::kubernetes::cluster_management::calico']
+      -> Class['slate::kubernetes::cluster_management::metallb']
+    }
 
     if $cluster_instantiating {
       contain slate::kubernetes::kubeadm_init

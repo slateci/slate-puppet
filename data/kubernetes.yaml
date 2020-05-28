@@ -80,6 +80,7 @@ slate::kubernetes::kubeadm_init::config:
       RotateKubeletServerCertificate: true
     readOnlyPort: 0
     cgroupDriver: "%{lookup('slate::kubernetes::cgroup_driver')}"
+slate::kubernetes::controller::manage_metallb: true
 slate::kubernetes::cluster_management::metallb::namespace_url: 'https://raw.githubusercontent.com/metallb/metallb/v0.9.3/manifests/namespace.yaml'
 slate::kubernetes::cluster_management::metallb::manifest_url: 'https://raw.githubusercontent.com/google/metallb/v0.9.3/manifests/metallb.yaml'
 slate::kubernetes::cluster_management::metallb::config:

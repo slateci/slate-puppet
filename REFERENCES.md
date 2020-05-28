@@ -143,6 +143,8 @@ This enables inclusion of /etc/sudoers.d to /etc/sudoers.
 
 This class handles installation of the SLATE CLI.
 
+* **Note** This class requires `jq` and `curl` to be installed.
+
 #### Parameters
 
 The following parameters are available in the `slate::cli` class.
@@ -230,8 +232,6 @@ Data type: `String`
 
 The cgroup_driver to use with Docker. The kubelet config is changed to reflect this cgroup_driver.
 
-Default value: 'systemd'
-
 ### slate::kubernetes::cluster_management::calico
 
 This class handles installing and updating Calico.
@@ -284,6 +284,13 @@ This class handles joining clusters, instantiating clusters, and settings for co
 #### Parameters
 
 The following parameters are available in the `slate::kubernetes::controller` class.
+
+##### `manage_metallb`
+
+Data type: `Boolean`
+
+Sets whether metallb is installed/configured by Puppet or not. Set to false on installation
+to disable MetalLB installation.
 
 ##### `schedule_on_controller`
 
@@ -470,6 +477,14 @@ Data type: `String`
 See slate::kubernetes::cgroup_driver.
 
 Default value: $slate::kubernetes::cgroup_driver
+
+##### `minimum_systemd_release`
+
+Data type: `Integer`
+
+
+
+Default value: 67
 
 ### slate::kubernetes::pre
 
