@@ -11,6 +11,7 @@ _Public Classes_
 * [`slate::accounts`](#slateaccounts): This class creates SLATE administrator accounts and places them in the 'slateadm' group.
 Which is created if not present.
 * [`slate::cli`](#slatecli): This class handles installation of the SLATE CLI.
+* [`slate::cloudinit`](#slatecloudinit): This class handles disabling cloud-init.
 * [`slate::kubernetes`](#slatekubernetes): This class handles the Kubernetes instantiation for specific nodes, then either instantiates a cluster or joins them to a cluster
 depending on what the node role is set to. The cluster will be spun up with Calico as the CNI and MetalLB as the load balancer.
 The cluster will also be instantiated as a high-availability cluster. Docker is used as the CRI. The installation process and joining
@@ -107,6 +108,14 @@ Sets specific `sysctl` parameters to better tune for Kubernetes performance.
 
 Default value: `true`
 
+##### `disable_cloudinit`
+
+Data type: `Boolean`
+
+Disables cloudinit and sets the hostname permanently.
+
+Default value: `false`
+
 ### slate::accounts
 
 This class creates SLATE administrator accounts and places them in the 'slateadm' group.
@@ -156,6 +165,10 @@ Data type: `String`
 The endpoint to use for the SLATE CLI.
 
 Default value: 'https://api.slateci.io:18080'
+
+### slate::cloudinit
+
+This class handles disabling cloud-init.
 
 ### slate::kubernetes
 
