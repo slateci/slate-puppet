@@ -9,14 +9,14 @@ class slate::firewall::post (
 ) {
   # IPv4 Rules
   if $enable_default_reject {
-    firewall { '999 drop all':
+    firewall { '999 default all':
       proto  => 'all',
       action => 'reject',
       reject => 'icmp-host-prohibited',
       before => undef,
     }
 
-    firewall { '999 drop all forward':
+    firewall { '999 default all forward':
       chain  => 'FORWARD',
       proto  => 'all',
       action => 'reject',
@@ -37,7 +37,7 @@ class slate::firewall::post (
     }
 
     # IPv6 Rules
-    firewall { '999 drop all (v6)':
+    firewall { '999 default all (v6)':
       proto    => 'all',
       action   => 'reject',
       reject   => 'icmp6-adm-prohibited',
@@ -45,7 +45,7 @@ class slate::firewall::post (
       before   => undef,
     }
 
-    firewall { '999 drop all forward (v6)':
+    firewall { '999 default all forward (v6)':
       chain    => 'FORWARD',
       proto    => 'all',
       action   => 'reject',
@@ -67,13 +67,13 @@ class slate::firewall::post (
     }
   }
   else {
-    firewall { '999 accept all':
+    firewall { '999 default all':
       proto  => 'all',
       action => 'accept',
       before => undef,
     }
 
-    firewall { '999 aceept all forward':
+    firewall { '999 default all forward':
       chain  => 'FORWARD',
       proto  => 'all',
       action => 'accept',
@@ -93,14 +93,14 @@ class slate::firewall::post (
     }
 
     # IPv6 Rules
-    firewall { '999 accept all (v6)':
+    firewall { '999 default all (v6)':
       proto    => 'all',
       action   => 'accept',
       provider => 'ip6tables',
       before   => undef,
     }
 
-    firewall { '999 accept all forward (v6)':
+    firewall { '999 default all forward (v6)':
       chain    => 'FORWARD',
       proto    => 'all',
       action   => 'accept',
