@@ -10,9 +10,12 @@
 #
 # @param slate_ports
 #   List of TCP ports to open for a SLATE-specific needs.
+# @param enable_default_reject
+#   Reject all ports not explicitly allowed.
 #
 class slate::security (
   Array[String] $slate_ports = [],
+  Boolean $enable_default_reject = true,
 ) {
   include 'slate::firewall::pre'
   include 'slate::firewall::post'

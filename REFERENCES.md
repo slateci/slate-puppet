@@ -671,6 +671,14 @@ List of TCP ports to open for a SLATE-specific needs.
 
 Default value: []
 
+##### `enable_default_reject`
+
+Data type: `Boolean`
+
+Reject all ports not explicitly allowed.
+
+Default value: `true`
+
 ### slate::tuning
 
 This class handles tuning of sysctl parameters for SLATE.

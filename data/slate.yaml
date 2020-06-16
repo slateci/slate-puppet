@@ -18,6 +18,7 @@ slate::packages::package_list:
 # Force update of systemd.
   - systemd
 slate::security::slate_ports:
+slate::security::enable_default_reject: true
 slate::accounts::user_accounts:
   lincolnb:
     sshkeys:
