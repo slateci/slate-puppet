@@ -1,3 +1,4 @@
+#!/bin/sh
 kubeadm reset -f
 systemctl stop kubelet
 
@@ -12,3 +13,4 @@ fi
 if [ -d '/var/lib/etcd' ]; then
     rm -rf /var/lib/etcd
 fi
+iptables -F && iptables -t nat -F && iptables -t mangle -F && iptables -X
